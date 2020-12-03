@@ -12,6 +12,7 @@
 #include "kyber.h"
 #include "shake.h"
 
+
 #ifdef _WIN32
 #include <windows.h>
 #include <wincrypt.h>
@@ -19,7 +20,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #ifdef __linux__
-#define _GNU_SOURCE
+
 #include <unistd.h>
 #include <sys/syscall.h>
 #else
@@ -29,6 +30,9 @@
 
 
 NAMESPACE_BEGIN(CryptoPP)
+
+// The Keccak core function
+extern void KeccakF1600(word64 *state);
 
 #ifdef _WIN32
 void RandomBytes::randombytes(uint8_t *out, size_t outlen) {
@@ -90,6 +94,117 @@ void RandomBytes::randombytes(uint8_t *out, size_t outlen) {
   }
 }
 #endif
+
+/*************************************************
+* Name:        load64
+*
+* Description: Load 8 bytes into uint64_t in little-endian order
+*
+* Arguments:   - const uint8_t *x: pointer to input byte array
+*
+* Returns the loaded 64-bit unsigned integer
+**************************************************/
+static uint64_t Load64(const uint8_t x[8]) {
+  unsigned int i;
+  uint64_t r = 0;
+
+  for(i=0;i<8;i++)
+    r |= (uint64_t)x[i] << 8*i;
+
+  return r;
+}
+
+/*************************************************
+* Name:        store64
+*
+* Description: Store a 64-bit integer to array of 8 bytes in little-endian order
+*
+* Arguments:   - uint8_t *x: pointer to the output byte array (allocated)
+*              - uint64_t u: input 64-bit unsigned integer
+**************************************************/
+static void Store64(uint8_t x[8], uint64_t u) {
+  unsigned int i;
+
+  for(i=0;i<8;i++)
+    x[i] = u >> 8*i;
+}
+
+
+/*************************************************
+* Name:        keccak_absorb
+*
+* Description: Absorb step of Keccak;
+*              non-incremental, starts by zeroeing the state.
+*
+* Arguments:   - uint64_t *s: pointer to (uninitialized) output Keccak state
+*              - unsigned int r: rate in bytes (e.g., 168 for SHAKE128)
+*              - const uint8_t *m: pointer to input to be absorbed into s
+*              - size_t mlen: length of input in bytes
+*              - uint8_t p: domain-separation byte for different
+*                           Keccak-derived functions
+**************************************************/
+void Kyber::KeccakAbsorb(uint64_t s[25], unsigned int r, const uint8_t *m, int mlen, uint8_t p)
+{
+  size_t i;
+  uint8_t t[200] = {0};
+
+  /* Zero state */
+  for(i=0;i<25;i++)
+    s[i] = 0;
+
+  while(mlen >= r) {
+    for(i=0;i<r/8;i++)
+      s[i] ^= Load64(m + 8*i);
+
+    KeccakF1600(s);
+    mlen -= r;
+    m += r;
+  }
+
+  for(i=0;i<mlen;i++)
+    t[i] = m[i];
+  t[i] = p;
+  t[r-1] |= 128;
+  for(i=0;i<r/8;i++)
+    s[i] ^= Load64(t + 8*i);
+}
+
+/*************************************************
+* Name:        keccak_squeezeblocks
+*
+* Description: Squeeze step of Keccak. Squeezes full blocks of r bytes each.
+*              Modifies the state. Can be called multiple times to keep
+*              squeezing, i.e., is incremental.
+*
+* Arguments:   - uint8_t *h: pointer to output blocks
+*              - size_t nblocks: number of blocks to be squeezed (written to h)
+*              - uint64_t *s: pointer to input/output Keccak state
+*              - unsigned int r: rate in bytes (e.g., 168 for SHAKE128)
+**************************************************/
+void Kyber::KeccakSqueezeBlocks(uint8_t *out,
+                                 size_t nblocks,
+                                 uint64_t s[25],
+                                 unsigned int r)
+{
+  unsigned int i;
+  while(nblocks > 0) {
+    KeccakF1600(s);
+    for(i=0;i<r/8;i++)
+      Store64(out + 8*i, s[i]);
+    out += r;
+    --nblocks;
+  }
+}
+
+void Kyber::Shake128Absorb(keccak_state *state, const uint8_t *in, int inlen) {
+  KeccakAbsorb(state->s, 168, in, inlen, 0x1F);
+}
+
+
+
+void Kyber::Shake128SqueezeBlocks(uint8_t *out, size_t nblocks, keccak_state *state) {
+  KeccakSqueezeBlocks(out, nblocks, state->s, 168);
+}
 
 
 /*************************************************

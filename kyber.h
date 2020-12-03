@@ -62,6 +62,7 @@ protected:
     void Shake128Absorb(keccak_state *state, const uint8_t *in, int inlen);
     void KeccakAbsorb(uint64_t s[25], unsigned int r, const uint8_t *m, int mlen, uint8_t p);
     void Shake128SqueezeBlocks(uint8_t *out, size_t nblocks, keccak_state *state);
+    void KeccakSqueezeBlocks(uint8_t *out, size_t nblocks, uint64_t s[25], unsigned int r);
 
 
 
