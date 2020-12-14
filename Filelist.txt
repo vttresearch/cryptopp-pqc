@@ -200,6 +200,12 @@ keccak.cpp
 keccak_core.cpp
 keccak_simd.cpp
 keccak.h
+kyber.cpp
+kyber.h
+kyber_ntt.cpp
+kyber_params.h
+kyber_poly.cpp
+kyber_utils.cpp
 lubyrack.h
 lea.cpp
 lea_simd.cpp

@@ -69,7 +69,7 @@ LIB_SRCS = \
     gcm_simd.cpp gf256.cpp gf2_32.cpp gf2n.cpp gf2n_simd.cpp gfpcrypt.cpp \
     gost.cpp gzip.cpp hc128.cpp hc256.cpp hex.cpp hight.cpp hmac.cpp \
     hrtimer.cpp ida.cpp idea.cpp iterhash.cpp kalyna.cpp kalynatab.cpp \
-    keccak.cpp keccak_core.cpp keccak_simd.cpp lea.cpp lea_simd.cpp luc.cpp \
+    keccak.cpp keccak_core.cpp keccak_simd.cpp kyber.cpp kyber_ntt.cpp kyber_poly.cpp kyber_utils.cpp lea.cpp lea_simd.cpp luc.cpp \
     mars.cpp marss.cpp md2.cpp md4.cpp md5.cpp misc.cpp modes.cpp mqueue.cpp \
     mqv.cpp nbtheory.cpp neon_simd.cpp oaep.cpp osrng.cpp padlkrng.cpp \
     panama.cpp pkcspad.cpp poly1305.cpp polynomi.cpp ppc_power7.cpp \
@@ -100,7 +100,7 @@ LIB_OBJS = \
     gcm_simd.obj gf256.obj gf2_32.obj gf2n.obj gf2n_simd.obj gfpcrypt.obj \
     gost.obj gzip.obj hc128.obj hc256.obj hex.obj hight.obj hmac.obj \
     hrtimer.obj ida.obj idea.obj iterhash.obj kalyna.obj kalynatab.obj \
-    keccak.obj keccak_core.obj keccak_simd.obj lea.obj lea_simd.obj luc.obj \
+    keccak.obj keccak_core.obj keccak_simd.obj kyber.obj kyber_ntt.obj kyber_poly.obj kyber_utils.obj lea.obj lea_simd.obj luc.obj \
     mars.obj marss.obj md2.obj md4.obj md5.obj misc.obj modes.obj mqueue.obj \
     mqv.obj nbtheory.obj neon_simd.obj oaep.obj osrng.obj padlkrng.obj \
     panama.obj pkcspad.obj poly1305.obj polynomi.obj ppc_power7.obj \
@@ -125,14 +125,14 @@ TEST_SRCS = \
     dlltest.cpp fipsalgt.cpp validat0.cpp validat1.cpp validat2.cpp \
     validat3.cpp validat4.cpp validat5.cpp validat6.cpp validat7.cpp \
     validat8.cpp validat9.cpp validat10.cpp regtest1.cpp regtest2.cpp \
-    regtest3.cpp regtest4.cpp
+    regtest3.cpp regtest4.cpp kyber_test.cpp
 
 TEST_OBJS = \
     test.obj bench1.obj bench2.obj bench3.obj datatest.obj \
     dlltest.obj fipsalgt.obj validat0.obj validat1.obj validat2.obj \
     validat3.obj validat4.obj validat5.obj validat6.obj validat7.obj \
     validat8.obj validat9.obj validat10.obj regtest1.obj regtest2.obj \
-    regtest3.obj regtest4.obj
+    regtest3.obj regtest4.obj kyber_test.obj
 
 CXX = cl.exe
 LD = link.exe
@@ -356,6 +356,8 @@ chacha_avx.obj:
 #validat9.obj:
 #	$(CXX) $(CXXFLAGS) $(CXXFLAGS_IMPORTS) /c $?
 #validat10.obj:
+#	$(CXX) $(CXXFLAGS) $(CXXFLAGS_IMPORTS) /c $?
+#kyber_test.obj:
 #	$(CXX) $(CXXFLAGS) $(CXXFLAGS_IMPORTS) /c $?
 
 # For testing cryptopp.dll and CRYPTOPP_EXPORTS

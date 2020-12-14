@@ -1,6 +1,10 @@
+/** The C++ file including the NTT stuff for CRYSTALS-Kyber. 
+Adapted from the reference
+implementation of kyber by the CRYSTALS team 
+(https://github.com/pq-crystals/kyber) */
+
 #include "kyber.h"
 #include "kyber_params.h"
-#include "kyber_utils.h"
 
 NAMESPACE_BEGIN(CryptoPP)
 
@@ -30,29 +34,15 @@ const int16_t Kyber::zetas_inv[128] = {
   3127, 3042, 1907, 1836, 1517, 359, 758, 1441
 };
 
-/*************************************************
-* Name:        fqmul
-*
-* Description: Multiplication followed by Montgomery reduction
-*
-* Arguments:   - int16_t a: first factor
-*              - int16_t b: second factor
-*
-* Returns 16-bit integer congruent to a*b*R^{-1} mod q
-**************************************************/
+
+//Multiplication followed by Montgomery reduction
+//Returns 16-bit integer congruent to a*b*R^{-1} mod q
 int16_t Kyber::Fqmul(int16_t a, int16_t b) {
   return MontgomeryReduce((int32_t)a*b);
 }
 
-/*************************************************
-* Name:        ntt
-*
-* Description: Inplace number-theoretic transform (NTT) in Rq
-*              input is in standard order, output is in bitreversed order
-*
-* Arguments:   - int16_t r[256]: pointer to input/output vector of elements
-*                                of Zq
-**************************************************/
+//Inplace number-theoretic transform (NTT) in Rq
+//input is in standard order, output is in bitreversed order
 void Kyber::Ntt(int16_t r[256]) {
   unsigned int len, start, j, k;
   int16_t t, zeta;
@@ -70,16 +60,9 @@ void Kyber::Ntt(int16_t r[256]) {
   }
 }
 
-/*************************************************
-* Name:        invntt_tomont
-*
-* Description: Inplace inverse number-theoretic transform in Rq and
-*              multiplication by Montgomery factor 2^16.
-*              Input is in bitreversed order, output is in standard order
-*
-* Arguments:   - int16_t r[256]: pointer to input/output vector of elements
-*                                of Zq
-**************************************************/
+//Inplace inverse number-theoretic transform in Rq and
+//multiplication by Montgomery factor 2^16.
+//Input is in bitreversed order, output is in standard order
 void Kyber::InvNtt(int16_t r[256]) {
   unsigned int start, len, j, k;
   int16_t t, zeta;
@@ -101,17 +84,10 @@ void Kyber::InvNtt(int16_t r[256]) {
     r[j] = Fqmul(r[j], zetas_inv[127]);
 }
 
-/*************************************************
-* Name:        basemul
-*
-* Description: Multiplication of polynomials in Zq[X]/(X^2-zeta)
-*              used for multiplication of elements in Rq in NTT domain
-*
-* Arguments:   - int16_t r[2]:       pointer to the output polynomial
-*              - const int16_t a[2]: pointer to the first factor
-*              - const int16_t b[2]: pointer to the second factor
-*              - int16_t zeta:       integer defining the reduction polynomial
-**************************************************/
+//int16_t r[2]:       pointer to the output polynomial
+//const int16_t a[2]: pointer to the first factor
+//const int16_t b[2]: pointer to the second factor
+//int16_t zeta:       integer defining the reduction polynomial
 void Kyber::Basemul(int16_t r[2],
              const int16_t a[2],
              const int16_t b[2],

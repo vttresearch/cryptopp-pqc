@@ -260,6 +260,10 @@
     <ClCompile Include="keccak.cpp" />
     <ClCompile Include="keccak_core.cpp" />
     <ClCompile Include="keccak_simd.cpp" />
+    <ClCOmpile Include="kyber.cpp" />
+    <ClCOmpile Include="kyber_ntt.cpp" />
+    <ClCOmpile Include="kyber_poly.cpp" />
+    <ClCOmpile Include="kyber_utils.cpp" />
     <ClCompile Include="lea.cpp" />
     <ClCompile Include="lea_simd.cpp" />
     <ClCompile Include="luc.cpp" />
@@ -482,6 +486,8 @@
     <ClInclude Include="iterhash.h" />
     <ClInclude Include="kalyna.h" />
     <ClInclude Include="keccak.h" />
+    <ClInclude Include="kyber.h" />
+    <ClInclude Include="kyber_params.h" />
     <ClInclude Include="lubyrack.h" />
     <ClInclude Include="lea.h" />
     <ClInclude Include="luc.h" />

@@ -1,14 +1,15 @@
+/** The C++ file for handling the polynomials of 
+CRYSTALS-Kyber. Adapted from the reference
+implementation of kyber by the CRYSTALS team 
+(https://github.com/pq-crystals/kyber) */
+
 #include "kyber.h"
 #include "kyber_params.h"
 
-/*
- * KyberPoly class handles the polynomials. 
- * 
- * 
- */
-
 NAMESPACE_BEGIN(CryptoPP)
 
+
+//Compression and subsequent serialization of a polynomial
 void Kyber::PolyCompress(uint8_t r[KYBER_POLYCOMPRESSEDBYTES], poly *a)
 {
   unsigned int i,j;
@@ -54,6 +55,9 @@ void Kyber::PolyCompress(uint8_t r[KYBER_POLYCOMPRESSEDBYTES], poly *a)
 #endif
 }
 
+
+//De-serialization and subsequent decompression of a polynomial;
+//approximate inverse of PolyCompress
 void Kyber::PolyDecompress(poly *r, const uint8_t a[KYBER_POLYCOMPRESSEDBYTES])
 {
   unsigned int i;
@@ -103,6 +107,8 @@ void Kyber::PolyDecompress(poly *r, const uint8_t a[KYBER_POLYCOMPRESSEDBYTES])
 #endif
 }
 
+
+//Serialize the polynomial
 void Kyber::PolyToBytes(uint8_t r[KYBER_POLYBYTES], poly *a)
 {
   unsigned int i;
@@ -119,8 +125,8 @@ void Kyber::PolyToBytes(uint8_t r[KYBER_POLYBYTES], poly *a)
   }
 }
 
-
-void Kyber::PolyFromBytes(poly *r, const uint8_t a[KYBER_POLYBYTES])
+//Deserialize the polynomial
+void Kyber::PolyFromBytes(poly* r, const uint8_t a[KYBER_POLYBYTES])
 {
   unsigned int i;
   for(i=0;i<KYBER_N/2;i++) {
@@ -129,7 +135,7 @@ void Kyber::PolyFromBytes(poly *r, const uint8_t a[KYBER_POLYBYTES])
   }
 }
 
-
+//Convert a 32 byte message to polynomial
 void Kyber::PolyFromMsg(poly *r, const uint8_t msg[KYBER_INDCPA_MSGBYTES])
 {
   unsigned int i,j;
@@ -147,6 +153,7 @@ void Kyber::PolyFromMsg(poly *r, const uint8_t msg[KYBER_INDCPA_MSGBYTES])
   }
 }
 
+//Convert polynomial to a 32 byte message
 void Kyber::PolyToMsg(uint8_t msg[KYBER_INDCPA_MSGBYTES], poly *a)
 {
   unsigned int i,j;
@@ -163,7 +170,9 @@ void Kyber::PolyToMsg(uint8_t msg[KYBER_INDCPA_MSGBYTES], poly *a)
   }
 }
 
-
+//Sample a polynomial deterministically from a seed and a nonce,
+//with output polynomial close to centered binomial distribution
+//with parameter KYBER_ETA
 void Kyber::PolyGetNoise(poly *r, const uint8_t seed[KYBER_SYMBYTES], uint8_t nonce)
 {
   uint8_t buf[KYBER_ETA*KYBER_N/4];
@@ -171,17 +180,25 @@ void Kyber::PolyGetNoise(poly *r, const uint8_t seed[KYBER_SYMBYTES], uint8_t no
   Cbd(r, buf);
 }
 
+//Computes negacyclic number-theoretic transform (NTT) of
+//a polynomial in place;
+//inputs assumed to be in normal order, output in bitreversed order
 void Kyber::PolyNtt(poly *r)
 {
   Ntt(r->coeffs);
   PolyReduce(r);
 }
 
+
+//Computes inverse of negacyclic number-theoretic transform (NTT)
+//of a polynomial in place;
+//inputs assumed to be in bitreversed order, output in normal order
 void Kyber::PolyInvNttToMont(poly *r)
 {
   InvNtt(r->coeffs);
 }
 
+//Multiplication of two polynomials in NTT domain
 void Kyber::PolyBasemulMontgomery(poly *r, const poly *a, const poly *b)
 {
   unsigned int i;
@@ -192,14 +209,9 @@ void Kyber::PolyBasemulMontgomery(poly *r, const poly *a, const poly *b)
   }
 }
 
-/*************************************************
-* Name:        poly_tomont
-*
-* Description: Inplace conversion of all coefficients of a polynomial
-*              from normal domain to Montgomery domain
-*
-* Arguments:   - poly *r: pointer to input/output polynomial
-**************************************************/
+
+//Inplace conversion of all coefficients of a polynomial
+//from normal domain to Montgomery domain
 void Kyber::PolyToMont(poly *r)
 {
   unsigned int i;
@@ -208,14 +220,8 @@ void Kyber::PolyToMont(poly *r)
     r->coeffs[i] = MontgomeryReduce((int32_t)r->coeffs[i]*f);
 }
 
-/*************************************************
-* Name:        poly_reduce
-*
-* Description: Applies Barrett reduction to all coefficients of a polynomial
-*              for details of the Barrett reduction see comments in reduce.c
-*
-* Arguments:   - poly *r: pointer to input/output polynomial
-**************************************************/
+
+//Applies Barrett reduction to all coefficients of a polynomial
 void Kyber::PolyReduce(poly *r)
 {
   unsigned int i;
@@ -223,15 +229,8 @@ void Kyber::PolyReduce(poly *r)
     r->coeffs[i] = BarrettReduce(r->coeffs[i]);
 }
 
-/*************************************************
-* Name:        poly_csubq
-*
-* Description: Applies conditional subtraction of q to each coefficient
-*              of a polynomial. For details of conditional subtraction
-*              of q see comments in reduce.c
-*
-* Arguments:   - poly *r: pointer to input/output polynomial
-**************************************************/
+// Applies conditional subtraction of q to each coefficient
+// of a polynomial.
 void Kyber::PolyCsubq(poly *r)
 {
   unsigned int i;
@@ -239,15 +238,9 @@ void Kyber::PolyCsubq(poly *r)
     r->coeffs[i] = Csubq(r->coeffs[i]);
 }
 
-/*************************************************
-* Name:        poly_add
-*
-* Description: Add two polynomials
-*
-* Arguments: - poly *r:       pointer to output polynomial
-*            - const poly *a: pointer to first input polynomial
-*            - const poly *b: pointer to second input polynomial
-**************************************************/
+
+//Add two polynomials
+
 void Kyber::PolyAdd(poly *r, const poly *a, const poly *b)
 {
   unsigned int i;
@@ -255,15 +248,8 @@ void Kyber::PolyAdd(poly *r, const poly *a, const poly *b)
     r->coeffs[i] = a->coeffs[i] + b->coeffs[i];
 }
 
-/*************************************************
-* Name:        poly_sub
-*
-* Description: Subtract two polynomials
-*
-* Arguments: - poly *r:       pointer to output polynomial
-*            - const poly *a: pointer to first input polynomial
-*            - const poly *b: pointer to second input polynomial
-**************************************************/
+
+//Subtract two polynomials
 void Kyber::PolySub(poly *r, const poly *a, const poly *b)
 {
   unsigned int i;
@@ -272,15 +258,8 @@ void Kyber::PolySub(poly *r, const poly *a, const poly *b)
 }
 
 
-/*************************************************
-* Name:        polyvec_compress
-*
-* Description: Compress and serialize vector of polynomials
-*
-* Arguments:   - uint8_t *r: pointer to output byte array
-*                            (needs space for KYBER_POLYVECCOMPRESSEDBYTES)
-*              - polyvec *a: pointer to input vector of polynomials
-**************************************************/
+
+//Compress and serialize vector of polynomials
 void Kyber::PolyvecCompress(uint8_t r[KYBER_POLYVECCOMPRESSEDBYTES], polyvec *a)
 {
   unsigned int i,j,k;
@@ -330,16 +309,9 @@ void Kyber::PolyvecCompress(uint8_t r[KYBER_POLYVECCOMPRESSEDBYTES], polyvec *a)
 #endif
 }
 
-/*************************************************
-* Name:        polyvec_decompress
-*
-* Description: De-serialize and decompress vector of polynomials;
-*              approximate inverse of polyvec_compress
-*
-* Arguments:   - polyvec *r:       pointer to output vector of polynomials
-*              - const uint8_t *a: pointer to input byte array
-*                                  (of length KYBER_POLYVECCOMPRESSEDBYTES)
-**************************************************/
+
+//De-serialize and decompress vector of polynomials;
+//approximate inverse of polyvec_compress
 void Kyber::PolyvecDecompress(polyvec *r,
                         const uint8_t a[KYBER_POLYVECCOMPRESSEDBYTES])
 {
@@ -382,15 +354,8 @@ void Kyber::PolyvecDecompress(polyvec *r,
 #endif
 }
 
-/*************************************************
-* Name:        polyvec_tobytes
-*
-* Description: Serialize vector of polynomials
-*
-* Arguments:   - uint8_t *r: pointer to output byte array
-*                            (needs space for KYBER_POLYVECBYTES)
-*              - polyvec *a: pointer to input vector of polynomials
-**************************************************/
+
+//Description: Serialize vector of polynomials
 void Kyber::PolyvecToBytes(uint8_t r[KYBER_POLYVECBYTES], polyvec *a)
 {
   unsigned int i;
@@ -398,16 +363,9 @@ void Kyber::PolyvecToBytes(uint8_t r[KYBER_POLYVECBYTES], polyvec *a)
     PolyToBytes(r+i*KYBER_POLYBYTES, &a->vec[i]);
 }
 
-/*************************************************
-* Name:        polyvec_frombytes
-*
-* Description: De-serialize vector of polynomials;
-*              inverse of polyvec_tobytes
-*
-* Arguments:   - uint8_t *r:       pointer to output byte array
-*              - const polyvec *a: pointer to input vector of polynomials
-*                                  (of length KYBER_POLYVECBYTES)
-**************************************************/
+//De-serialize vector of polynomials;
+//inverse of polyvec_tobytes
+
 void Kyber::PolyvecFromBytes(polyvec *r, const uint8_t a[KYBER_POLYVECBYTES])
 {
   unsigned int i;
@@ -415,13 +373,7 @@ void Kyber::PolyvecFromBytes(polyvec *r, const uint8_t a[KYBER_POLYVECBYTES])
     PolyFromBytes(&r->vec[i], a+i*KYBER_POLYBYTES);
 }
 
-/*************************************************
-* Name:        polyvec_ntt
-*
-* Description: Apply forward NTT to all elements of a vector of polynomials
-*
-* Arguments:   - polyvec *r: pointer to in/output vector of polynomials
-**************************************************/
+//Apply forward NTT to all elements of a vector of polynomials
 void Kyber::PolyvecNtt(polyvec *r)
 {
   unsigned int i;
@@ -429,14 +381,9 @@ void Kyber::PolyvecNtt(polyvec *r)
     PolyNtt(&r->vec[i]);
 }
 
-/*************************************************
-* Name:        polyvec_invntt_tomont
-*
-* Description: Apply inverse NTT to all elements of a vector of polynomials
-*              and multiply by Montgomery factor 2^16
-*
-* Arguments:   - polyvec *r: pointer to in/output vector of polynomials
-**************************************************/
+//Apply inverse NTT to all elements of a vector of polynomials
+//and multiply by Montgomery factor 2^16
+
 void Kyber::PolyvecInvNttToMont(polyvec *r)
 {
   unsigned int i;
@@ -444,16 +391,10 @@ void Kyber::PolyvecInvNttToMont(polyvec *r)
     PolyInvNttToMont(&r->vec[i]);
 }
 
-/*************************************************
-* Name:        polyvec_pointwise_acc_montgomery
-*
-* Description: Pointwise multiply elements of a and b, accumulate into r,
-*              and multiply by 2^-16.
-*
-* Arguments: - poly *r:          pointer to output polynomial
-*            - const polyvec *a: pointer to first input vector of polynomials
-*            - const polyvec *b: pointer to second input vector of polynomials
-**************************************************/
+
+//Pointwise multiply elements of a and b, accumulate into r,
+//and multiply by 2^-16.
+
 void Kyber::PolyvecPointwiseAccMontgomery(poly *r,
                                       const polyvec *a,
                                       const polyvec *b)
@@ -470,15 +411,9 @@ void Kyber::PolyvecPointwiseAccMontgomery(poly *r,
   PolyReduce(r);
 }
 
-/*************************************************
-* Name:        polyvec_reduce
-*
-* Description: Applies Barrett reduction to each coefficient
-*              of each element of a vector of polynomials
-*              for details of the Barrett reduction see comments in reduce.c
-*
-* Arguments:   - poly *r: pointer to input/output polynomial
-**************************************************/
+
+//Applies Barrett reduction to each coefficient
+//of each element of a vector of polynomials
 void Kyber::PolyvecReduce(polyvec *r)
 {
   unsigned int i;
@@ -486,16 +421,8 @@ void Kyber::PolyvecReduce(polyvec *r)
     PolyReduce(&r->vec[i]);
 }
 
-/*************************************************
-* Name:        polyvec_csubq
-*
-* Description: Applies conditional subtraction of q to each coefficient
-*              of each element of a vector of polynomials
-*              for details of conditional subtraction of q see comments in
-*              reduce.c
-*
-* Arguments:   - poly *r: pointer to input/output polynomial
-**************************************************/
+//Applies conditional subtraction of q to each coefficient
+//of each element of a vector of polynomials
 void Kyber::PolyvecCsubq(polyvec *r)
 {
   unsigned int i;
@@ -503,15 +430,7 @@ void Kyber::PolyvecCsubq(polyvec *r)
     PolyCsubq(&r->vec[i]);
 }
 
-/*************************************************
-* Name:        polyvec_add
-*
-* Description: Add vectors of polynomials
-*
-* Arguments: - polyvec *r:       pointer to output vector of polynomials
-*            - const polyvec *a: pointer to first input vector of polynomials
-*            - const polyvec *b: pointer to second input vector of polynomials
-**************************************************/
+//Add vectors of polynomials
 void Kyber::PolyvecAdd(polyvec *r, const polyvec *a, const polyvec *b)
 {
   unsigned int i;

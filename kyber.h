@@ -16,7 +16,22 @@ NAMESPACE_BEGIN(CryptoPP)
 class Kyber : public Algorithm
 {
 public:
-    int CryptoKemKeypair(unsigned char *pk, unsigned char *sk);
+    int KemKeypair(unsigned char *pk, unsigned char *sk);
+    int KemEnc(unsigned char *ct, unsigned char *ss, const unsigned char *pk);
+    int KemDec(unsigned char *ss, const unsigned char *ct, const unsigned char *sk);
+
+    void randombytes(uint8_t *out, size_t outlen);
+
+    void IndCpaKeypair(uint8_t pk[], uint8_t sk[]);
+
+    void IndCpaEnc(uint8_t c[KYBER_INDCPA_BYTES],
+                const uint8_t m[KYBER_INDCPA_MSGBYTES],
+                const uint8_t pk[KYBER_INDCPA_PUBLICKEYBYTES],
+                const uint8_t coins[KYBER_SYMBYTES]);
+    void IndCpaDec(uint8_t m[KYBER_INDCPA_MSGBYTES],
+                const uint8_t c[KYBER_INDCPA_BYTES],
+                const uint8_t sk[KYBER_INDCPA_SECRETKEYBYTES]);
+
 
     
 
@@ -49,18 +64,19 @@ protected:
 
 
     int CheckKeySize(unsigned int key[], unsigned int keySize);
-    void IndCpaKeypair(uint8_t pk[], uint8_t sk[]);
-    
+
     
     unsigned int RejUniform(int16_t *r, unsigned int len, const uint8_t *buf, unsigned int buflen);
 
-    void GenMatrix(polyvec *a, const uint8_t seed[], int transposed);
+    void GenMatrix(polyvec *a, const uint8_t seed[KYBER_SYMBYTES], int transposed);
     typedef struct {
         uint64_t s[25];
     } keccak_state;
 
-    void Shake128Absorb(keccak_state *state, const uint8_t *in, int inlen);
+    void XOFAbsorb(keccak_state *state, const uint8_t seed[KYBER_SYMBYTES], uint8_t x, uint8_t y);
+    void Shake128Absorb(keccak_state *state, const uint8_t *in, size_t inlen);
     void KeccakAbsorb(uint64_t s[25], unsigned int r, const uint8_t *m, int mlen, uint8_t p);
+    void XOFSqueezeBlocks(uint8_t *out, size_t nblocks, keccak_state *state);
     void Shake128SqueezeBlocks(uint8_t *out, size_t nblocks, keccak_state *state);
     void KeccakSqueezeBlocks(uint8_t *out, size_t nblocks, uint64_t s[25], unsigned int r);
 
@@ -129,6 +145,10 @@ protected:
     void UnpackCiphertext(polyvec *b,
                               poly *v,
                               const uint8_t c[KYBER_INDCPA_BYTES]);
+
+
+    void Cmov(uint8_t *r, const uint8_t *x, size_t len, uint8_t b);
+
 
     
 

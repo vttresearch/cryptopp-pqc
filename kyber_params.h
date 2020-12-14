@@ -1,3 +1,10 @@
+/* The params file for CRYSTALS-Kyber. Adapted from the reference
+implementation of kyber by the CRYSTALS team 
+(https://github.com/pq-crystals/kyber) */
+
+//TODO: This is a first version, figure out a sensible way to support 
+//different parameters
+
 #ifndef KYBER_PARAMS_H
 #define KYBER_PARAMS_H
 

@@ -266,6 +266,18 @@
     <ClCompile Include="keccak_simd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="kyber.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="kyber_ntt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="kyber_poly.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="kyber_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="lea.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -793,6 +805,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="keccak.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kyber.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kyber_params.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="lubyrack.h">

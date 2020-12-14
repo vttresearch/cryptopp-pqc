@@ -31,6 +31,9 @@
 #include "validate.h"
 #include "bench.h"
 
+//Kyber tests
+#include "kyber_test.h"
+
 #include <iostream>
 #include <sstream>
 #include <locale>
@@ -431,6 +434,11 @@ int scoped_main(int argc, char *argv[])
 		else if (command == "V")
 		{
 			std::cout << CRYPTOPP_VERSION / 100 << '.' << (CRYPTOPP_VERSION % 100) / 10 << '.' << CRYPTOPP_VERSION % 10 << std::endl;
+		}
+		//Testing kyber
+		else if (command == "k") 
+		{
+			RunKyberTests();
 		}
 		else
 		{
