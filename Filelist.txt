@@ -203,7 +203,6 @@ keccak.h
 kyber.cpp
 kyber.h
 kyber_ntt.cpp
-kyber_params.h
 kyber_poly.cpp
 kyber_utils.cpp
 lubyrack.h

@@ -4,11 +4,11 @@ implementation of kyber by the CRYSTALS team
 (https://github.com/pq-crystals/kyber) */
 
 #include "kyber.h"
-#include "kyber_params.h"
 
 NAMESPACE_BEGIN(CryptoPP)
 
-const int16_t Kyber::zetas[128] = {
+template<int T_K, unsigned int T_Compr>
+const int16_t Kyber<T_K, T_Compr>::zetas[128] = {
   2285, 2571, 2970, 1812, 1493, 1422, 287, 202, 3158, 622, 1577, 182, 962,
   2127, 1855, 1468, 573, 2004, 264, 383, 2500, 1458, 1727, 3199, 2648, 1017,
   732, 608, 1787, 411, 3124, 1758, 1223, 652, 2777, 1015, 2036, 1491, 3047,
@@ -21,7 +21,8 @@ const int16_t Kyber::zetas[128] = {
   478, 3221, 3021, 996, 991, 958, 1869, 1522, 1628
 };
 
-const int16_t Kyber::zetas_inv[128] = {
+template<int T_K, unsigned int T_Compr>
+const int16_t Kyber<T_K, T_Compr>::zetas_inv[128] = {
   1701, 1807, 1460, 2371, 2338, 2333, 308, 108, 2851, 870, 854, 1510, 2535,
   1278, 1530, 1185, 1659, 1187, 3109, 874, 1335, 2111, 136, 1215, 2945, 1465,
   1285, 2007, 2719, 2726, 2232, 2512, 75, 156, 3000, 2911, 2980, 872, 2685,
@@ -37,13 +38,15 @@ const int16_t Kyber::zetas_inv[128] = {
 
 //Multiplication followed by Montgomery reduction
 //Returns 16-bit integer congruent to a*b*R^{-1} mod q
-int16_t Kyber::Fqmul(int16_t a, int16_t b) {
+template<int T_K, unsigned int T_Compr>
+int16_t Kyber<T_K, T_Compr>::Fqmul(int16_t a, int16_t b) {
   return MontgomeryReduce((int32_t)a*b);
 }
 
 //Inplace number-theoretic transform (NTT) in Rq
 //input is in standard order, output is in bitreversed order
-void Kyber::Ntt(int16_t r[256]) {
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::Ntt(int16_t r[256]) {
   unsigned int len, start, j, k;
   int16_t t, zeta;
 
@@ -63,7 +66,8 @@ void Kyber::Ntt(int16_t r[256]) {
 //Inplace inverse number-theoretic transform in Rq and
 //multiplication by Montgomery factor 2^16.
 //Input is in bitreversed order, output is in standard order
-void Kyber::InvNtt(int16_t r[256]) {
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::InvNtt(int16_t r[256]) {
   unsigned int start, len, j, k;
   int16_t t, zeta;
 
@@ -88,7 +92,8 @@ void Kyber::InvNtt(int16_t r[256]) {
 //const int16_t a[2]: pointer to the first factor
 //const int16_t b[2]: pointer to the second factor
 //int16_t zeta:       integer defining the reduction polynomial
-void Kyber::Basemul(int16_t r[2],
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::Basemul(int16_t r[2],
              const int16_t a[2],
              const int16_t b[2],
              int16_t zeta)
@@ -100,5 +105,9 @@ void Kyber::Basemul(int16_t r[2],
   r[1]  = Fqmul(a[0], b[1]);
   r[1] += Fqmul(a[1], b[0]);
 }
+
+template class Kyber<2, 320>;
+template class Kyber<3, 320>;
+template class Kyber<4, 352>;
 
 NAMESPACE_END

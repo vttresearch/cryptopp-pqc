@@ -1,5 +1,5 @@
 /*
- * Utility functions for Kyber. Adapted from the reference
+ * Miscellaneous utility functions for Kyber. Adapted from the reference
  * implementation of Kyber by the CRYSTALS team
  * (https://github.com/pq-crystals/kyber)
  */
@@ -36,7 +36,8 @@ extern void KeccakF1600(word64 *state);
 
 //Random bytes implementation for kyber
 #ifdef _WIN32
-void Kyber::randombytes(uint8_t *out, size_t outlen) {
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K,T_Compr>::randombytes(uint8_t *out, size_t outlen) {
   HCRYPTPROV ctx;
   DWORD len;
 
@@ -56,7 +57,8 @@ void Kyber::randombytes(uint8_t *out, size_t outlen) {
     abort();
 }
 #elif defined(__linux__) && defined(SYS_getrandom)
-void Kyber::randombytes(uint8_t *out, size_t outlen) {
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K,T_Compr>::randombytes(uint8_t *out, size_t outlen) {
   ssize_t ret;
   //std::fill_n(out, outlen, 1);
   while(outlen > 0) {
@@ -71,7 +73,8 @@ void Kyber::randombytes(uint8_t *out, size_t outlen) {
   }
 }
 #else
-void Kyber::randombytes(uint8_t *out, size_t outlen) {
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K,T_Compr>::randombytes(uint8_t *out, size_t outlen) {
   static int fd = -1;
   ssize_t ret;
 
@@ -126,7 +129,8 @@ static void Store64(uint8_t x[8], uint64_t u) {
 //const uint8_t *m: pointer to input to be absorbed into s
 //size_t mlen: length of input in bytes
 //uint8_t p: domain-separation byte for different Keccak-derived functions
-void Kyber::KeccakAbsorb(uint64_t s[25], unsigned int r, const uint8_t *m, int mlen, uint8_t p)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K,T_Compr>::KeccakAbsorb(uint64_t s[25], unsigned int r, const uint8_t *m, int mlen, uint8_t p)
 {
   size_t i;
   uint8_t t[200] = {0};
@@ -161,7 +165,8 @@ void Kyber::KeccakAbsorb(uint64_t s[25], unsigned int r, const uint8_t *m, int m
 //uint64_t *s: pointer to input/output Keccak state
 //unsigned int r: rate in bytes (e.g., 168 for SHAKE128)
 
-void Kyber::KeccakSqueezeBlocks(uint8_t *out,
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K,T_Compr>::KeccakSqueezeBlocks(uint8_t *out,
                                  size_t nblocks,
                                  uint64_t s[25],
                                  unsigned int r)
@@ -176,11 +181,12 @@ void Kyber::KeccakSqueezeBlocks(uint8_t *out,
   }
 }
 
-void Kyber::XOFAbsorb(keccak_state *state, const uint8_t seed[KYBER_SYMBYTES], uint8_t x, uint8_t y) {
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K,T_Compr>::XOFAbsorb(keccak_state *state, const uint8_t *seed, uint8_t x, uint8_t y) {
   unsigned int i;
-  uint8_t extseed[KYBER_SYMBYTES+2];
+  uint8_t extseed[SYMBYTES+2];
 
-  for(i=0;i<KYBER_SYMBYTES;i++)
+  for(i=0;i<SYMBYTES;i++)
     extseed[i] = seed[i];
   extseed[i++] = x;
   extseed[i]   = y;
@@ -189,12 +195,14 @@ void Kyber::XOFAbsorb(keccak_state *state, const uint8_t seed[KYBER_SYMBYTES], u
   
 }
 
-void Kyber::Shake128Absorb(keccak_state *state, const uint8_t *in, size_t inlen) {
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K,T_Compr>::Shake128Absorb(keccak_state *state, const uint8_t *in, size_t inlen) {
   KeccakAbsorb(state->s, 168, in, inlen, 0x1F);
 }
 
 
-void Kyber::XOFSqueezeBlocks(uint8_t *out, size_t nblocks, keccak_state *state) {
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K,T_Compr>::XOFSqueezeBlocks(uint8_t *out, size_t nblocks, keccak_state *state) {
   KeccakSqueezeBlocks(out, nblocks, state->s, 168);
 }
 
@@ -205,13 +213,14 @@ void Kyber::XOFSqueezeBlocks(uint8_t *out, size_t nblocks, keccak_state *state) 
 //                          has to be in {-q2^15,...,q2^15-1}
 
 //returns integer in {-q+1,...,q-1} congruent to a * R^-1 modulo q.
-int16_t Kyber::MontgomeryReduce(int32_t a)
+template<int T_K, unsigned int T_Compr>
+int16_t Kyber<T_K,T_Compr>::MontgomeryReduce(int32_t a)
 {
   int32_t t;
   int16_t u;
 
   u = a*QINV;
-  t = (int32_t)u*KYBER_Q;
+  t = (int32_t)u*Q;
   t = a - t;
   t >>= 16;
   return t;
@@ -222,21 +231,23 @@ int16_t Kyber::MontgomeryReduce(int32_t a)
 //16-bit integer congruent to a mod q in {0,...,q}
 //int16_t a: input integer to be reduced
 //returns integer in {0,...,q} congruent to a modulo q.
-int16_t Kyber::BarrettReduce(int16_t a) {
+template<int T_K, unsigned int T_Compr>
+int16_t Kyber<T_K,T_Compr>::BarrettReduce(int16_t a) {
   int16_t t;
-  const int16_t v = ((1U << 26) + KYBER_Q/2)/KYBER_Q;
+  const int16_t v = ((1U << 26) + Q/2)/Q;
 
   t  = (int32_t)v*a >> 26;
-  t *= KYBER_Q;
+  t *= Q;
   return a - t;
 }
 
 
 //Conditionallly subtract q
 //  a - q if a >= q, else a
-int16_t Kyber::Csubq(int16_t a) {
-  a -= KYBER_Q;
-  a += (a >> 15) & KYBER_Q;
+template<int T_K, unsigned int T_Compr>
+int16_t Kyber<T_K,T_Compr>::Csubq(int16_t a) {
+  a -= Q;
+  a += (a >> 15) & Q;
   return a;
 };
 
@@ -244,15 +255,13 @@ int16_t Kyber::Csubq(int16_t a) {
 
 //Usage of SHAKE256 as a PRF, concatenates secret and public input
 //and then generates outlen bytes of SHAKE256 output
-void Kyber::Shake256Prf(uint8_t *out,
-                        size_t outlen,
-                        const uint8_t key[KYBER_SYMBYTES],
-                        uint8_t nonce)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K,T_Compr>::Shake256Prf(uint8_t *out, size_t outlen, const uint8_t *key, uint8_t nonce)
 {
   unsigned int i;
-  uint8_t extkey[KYBER_SYMBYTES+1];
+  uint8_t extkey[SYMBYTES+1];
 
-  for(i=0;i<KYBER_SYMBYTES;i++)
+  for(i=0;i<SYMBYTES;i++)
     extkey[i] = key[i];
   extkey[i] = nonce;
 
@@ -278,13 +287,14 @@ static uint32_t Load32_LittleEndian(const uint8_t x[4])
 //Given an array of uniformly random bytes, compute
 // polynomial with coefficients distributed according to
 //a centered binomial distribution with parameter KYBER_ETA
-void Kyber::Cbd(poly *r, const uint8_t buf[KYBER_ETA*KYBER_N/4])
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K,T_Compr>::Cbd(poly *r, const uint8_t *buf)
 {
   unsigned int i,j;
   uint32_t t,d;
   int16_t a,b;
 
-  for(i=0;i<KYBER_N/8;i++) {
+  for(i=0;i<N/8;i++) {
     t  = Load32_LittleEndian(buf+4*i);
     d  = t & 0x55555555;
     d += (t>>1) & 0x55555555;
@@ -302,7 +312,8 @@ void Kyber::Cbd(poly *r, const uint8_t buf[KYBER_ETA*KYBER_N/4])
 // assumes two's complement representation of negative integers.
 // Runs in constant time.
 
-void Kyber::Cmov(uint8_t *r, const uint8_t *x, size_t len, uint8_t b)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K,T_Compr>::Cmov(uint8_t *r, const uint8_t *x, size_t len, uint8_t b)
 {
   size_t i;
 
@@ -311,6 +322,8 @@ void Kyber::Cmov(uint8_t *r, const uint8_t *x, size_t len, uint8_t b)
     r[i] ^= b & (r[i] ^ x[i]);
 }
 
-
+template class Kyber<2, 320>;
+template class Kyber<3, 320>;
+template class Kyber<4, 352>;
 
 NAMESPACE_END

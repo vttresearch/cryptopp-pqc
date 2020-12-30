@@ -4,119 +4,125 @@ implementation of kyber by the CRYSTALS team
 (https://github.com/pq-crystals/kyber) */
 
 #include "kyber.h"
-#include "kyber_params.h"
 
 NAMESPACE_BEGIN(CryptoPP)
 
 
+
 //Compression and subsequent serialization of a polynomial
-void Kyber::PolyCompress(uint8_t r[KYBER_POLYCOMPRESSEDBYTES], poly *a)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyCompress(uint8_t *r, poly *a)
 {
   unsigned int i,j;
   uint8_t t[8];
 
   PolyCsubq(a);
 
-#if (KYBER_POLYCOMPRESSEDBYTES == 96)
-  for(i=0;i<KYBER_N/8;i++) {
-    for(j=0;j<8;j++)
-      t[j] = ((((uint16_t)a->coeffs[8*i+j] << 3) + KYBER_Q/2)/KYBER_Q) & 7;
+  if (POLYCOMPRESSEDBYTES == 96) {
+    for(i=0;i<N/8;i++) {
+      for(j=0;j<8;j++)
+        t[j] = ((((uint16_t)a->coeffs[8*i+j] << 3) + Q/2)/Q) & 7;
 
-    r[0] = (t[0] >> 0) | (t[1] << 3) | (t[2] << 6);
-    r[1] = (t[2] >> 2) | (t[3] << 1) | (t[4] << 4) | (t[5] << 7);
-    r[2] = (t[5] >> 1) | (t[6] << 2) | (t[7] << 5);
-    r += 3;
+      r[0] = (t[0] >> 0) | (t[1] << 3) | (t[2] << 6);
+      r[1] = (t[2] >> 2) | (t[3] << 1) | (t[4] << 4) | (t[5] << 7);
+      r[2] = (t[5] >> 1) | (t[6] << 2) | (t[7] << 5);
+      r += 3;
+    }
   }
-#elif (KYBER_POLYCOMPRESSEDBYTES == 128)
-  for(i=0;i<KYBER_N/8;i++) {
-    for(j=0;j<8;j++)
-      t[j] = ((((uint16_t)a->coeffs[8*i+j] << 4) + KYBER_Q/2)/KYBER_Q) & 15;
+  else if (POLYCOMPRESSEDBYTES == 128) {
+    for(i=0;i<N/8;i++) {
+      for(j=0;j<8;j++)
+        t[j] = ((((uint16_t)a->coeffs[8*i+j] << 4) + Q/2)/Q) & 15;
 
-    r[0] = t[0] | (t[1] << 4);
-    r[1] = t[2] | (t[3] << 4);
-    r[2] = t[4] | (t[5] << 4);
-    r[3] = t[6] | (t[7] << 4);
-    r += 4;
+      r[0] = t[0] | (t[1] << 4);
+      r[1] = t[2] | (t[3] << 4);
+      r[2] = t[4] | (t[5] << 4);
+      r[3] = t[6] | (t[7] << 4);
+      r += 4;
+    }
   }
-#elif (KYBER_POLYCOMPRESSEDBYTES == 160)
-  for(i=0;i<KYBER_N/8;i++) {
-    for(j=0;j<8;j++)
-      t[j] = ((((uint32_t)a->coeffs[8*i+j] << 5) + KYBER_Q/2)/KYBER_Q) & 31;
+    
+  else if (POLYCOMPRESSEDBYTES == 160) {
+    for(i=0;i<N/8;i++) {
+      for(j=0;j<8;j++)
+        t[j] = ((((uint32_t)a->coeffs[8*i+j] << 5) + Q/2)/Q) & 31;
 
-    r[0] = (t[0] >> 0) | (t[1] << 5);
-    r[1] = (t[1] >> 3) | (t[2] << 2) | (t[3] << 7);
-    r[2] = (t[3] >> 1) | (t[4] << 4);
-    r[3] = (t[4] >> 4) | (t[5] << 1) | (t[6] << 6);
-    r[4] = (t[6] >> 2) | (t[7] << 3);
-    r += 5;
+      r[0] = (t[0] >> 0) | (t[1] << 5);
+      r[1] = (t[1] >> 3) | (t[2] << 2) | (t[3] << 7);
+      r[2] = (t[3] >> 1) | (t[4] << 4);
+      r[3] = (t[4] >> 4) | (t[5] << 1) | (t[6] << 6);
+      r[4] = (t[6] >> 2) | (t[7] << 3);
+      r += 5;
+    }
   }
-#else
-#error "KYBER_POLYCOMPRESSEDBYTES needs to be in {96, 128, 160}"
-#endif
+  
 }
 
 
 //De-serialization and subsequent decompression of a polynomial;
 //approximate inverse of PolyCompress
-void Kyber::PolyDecompress(poly *r, const uint8_t a[KYBER_POLYCOMPRESSEDBYTES])
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyDecompress(poly *r, const uint8_t *a)
 {
   unsigned int i;
 
-#if (KYBER_POLYCOMPRESSEDBYTES == 96)
-  unsigned int j;
-  uint8_t t[8];
-  for(i=0;i<KYBER_N/8;i++) {
-    t[0] = (a[0] >> 0);
-    t[1] = (a[0] >> 3);
-    t[2] = (a[0] >> 6) | (a[1] << 2);
-    t[3] = (a[1] >> 1);
-    t[4] = (a[1] >> 4);
-    t[5] = (a[1] >> 7) | (a[2] << 1);
-    t[6] = (a[2] >> 2);
-    t[7] = (a[2] >> 5);
-    a += 3;
+  if (POLYCOMPRESSEDBYTES == 96) {
+    unsigned int j;
+    uint8_t t[8];
+    for(i=0;i<N/8;i++) {
+      t[0] = (a[0] >> 0);
+      t[1] = (a[0] >> 3);
+      t[2] = (a[0] >> 6) | (a[1] << 2);
+      t[3] = (a[1] >> 1);
+      t[4] = (a[1] >> 4);
+      t[5] = (a[1] >> 7) | (a[2] << 1);
+      t[6] = (a[2] >> 2);
+      t[7] = (a[2] >> 5);
+      a += 3;
 
-    for(j=0;j<8;j++)
-      r->coeffs[8*i+j] = ((uint16_t)(t[j] & 7)*KYBER_Q + 4) >> 3;
+      for(j=0;j<8;j++)
+        r->coeffs[8*i+j] = ((uint16_t)(t[j] & 7)*Q + 4) >> 3;
+    }
   }
-#elif (KYBER_POLYCOMPRESSEDBYTES == 128)
-  for(i=0;i<KYBER_N/2;i++) {
-    r->coeffs[2*i+0] = (((uint16_t)(a[0] & 15)*KYBER_Q) + 8) >> 4;
-    r->coeffs[2*i+1] = (((uint16_t)(a[0] >> 4)*KYBER_Q) + 8) >> 4;
-    a += 1;
+  else if (POLYCOMPRESSEDBYTES == 128) {
+    for(i=0;i<N/2;i++) {
+      r->coeffs[2*i+0] = (((uint16_t)(a[0] & 15)*Q) + 8) >> 4;
+      r->coeffs[2*i+1] = (((uint16_t)(a[0] >> 4)*Q) + 8) >> 4;
+      a += 1;
+    }
   }
-#elif (KYBER_POLYCOMPRESSEDBYTES == 160)
-  unsigned int j;
-  uint8_t t[8];
-  for(i=0;i<KYBER_N/8;i++) {
-    t[0] = (a[0] >> 0);
-    t[1] = (a[0] >> 5) | (a[1] << 3);
-    t[2] = (a[1] >> 2);
-    t[3] = (a[1] >> 7) | (a[2] << 1);
-    t[4] = (a[2] >> 4) | (a[3] << 4);
-    t[5] = (a[3] >> 1);
-    t[6] = (a[3] >> 6) | (a[4] << 2);
-    t[7] = (a[4] >> 3);
-    a += 5;
+  else if (POLYCOMPRESSEDBYTES == 160) {
+    unsigned int j;
+    uint8_t t[8];
+    for(i=0;i<N/8;i++) {
+      t[0] = (a[0] >> 0);
+      t[1] = (a[0] >> 5) | (a[1] << 3);
+      t[2] = (a[1] >> 2);
+      t[3] = (a[1] >> 7) | (a[2] << 1);
+      t[4] = (a[2] >> 4) | (a[3] << 4);
+      t[5] = (a[3] >> 1);
+      t[6] = (a[3] >> 6) | (a[4] << 2);
+      t[7] = (a[4] >> 3);
+      a += 5;
 
-    for(j=0;j<8;j++)
-      r->coeffs[8*i+j] = ((uint32_t)(t[j] & 31)*KYBER_Q + 16) >> 5;
+      for(j=0;j<8;j++)
+        r->coeffs[8*i+j] = ((uint32_t)(t[j] & 31)*Q + 16) >> 5;
+    }
   }
-#else
-#error "KYBER_POLYCOMPRESSEDBYTES needs to be in {96, 128, 160}"
-#endif
+
 }
 
 
 //Serialize the polynomial
-void Kyber::PolyToBytes(uint8_t r[KYBER_POLYBYTES], poly *a)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyToBytes(uint8_t *r, poly *a)
 {
   unsigned int i;
   uint16_t t0, t1;
 
   PolyCsubq(a);
 
-  for(i=0;i<KYBER_N/2;i++) {
+  for(i=0;i<N/2;i++) {
     t0 = a->coeffs[2*i];
     t1 = a->coeffs[2*i+1];
     r[3*i+0] = (t0 >> 0);
@@ -126,45 +132,45 @@ void Kyber::PolyToBytes(uint8_t r[KYBER_POLYBYTES], poly *a)
 }
 
 //Deserialize the polynomial
-void Kyber::PolyFromBytes(poly* r, const uint8_t a[KYBER_POLYBYTES])
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyFromBytes(poly* r, const uint8_t *a)
 {
   unsigned int i;
-  for(i=0;i<KYBER_N/2;i++) {
+  for(i=0;i<N/2;i++) {
     r->coeffs[2*i]   = ((a[3*i+0] >> 0) | ((uint16_t)a[3*i+1] << 8)) & 0xFFF;
     r->coeffs[2*i+1] = ((a[3*i+1] >> 4) | ((uint16_t)a[3*i+2] << 4)) & 0xFFF;
   }
 }
 
 //Convert a 32 byte message to polynomial
-void Kyber::PolyFromMsg(poly *r, const uint8_t msg[KYBER_INDCPA_MSGBYTES])
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyFromMsg(poly *r, const uint8_t *msg)
 {
   unsigned int i,j;
   int16_t mask;
 
-#if (KYBER_INDCPA_MSGBYTES != KYBER_N/8)
-#error "KYBER_INDCPA_MSGBYTES must be equal to KYBER_N/8 bytes!"
-#endif
 
-  for(i=0;i<KYBER_N/8;i++) {
+  for(i=0;i<N/8;i++) {
     for(j=0;j<8;j++) {
       mask = -(int16_t)((msg[i] >> j)&1);
-      r->coeffs[8*i+j] = mask & ((KYBER_Q+1)/2);
+      r->coeffs[8*i+j] = mask & ((Q+1)/2);
     }
   }
 }
 
 //Convert polynomial to a 32 byte message
-void Kyber::PolyToMsg(uint8_t msg[KYBER_INDCPA_MSGBYTES], poly *a)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyToMsg(uint8_t *msg, poly *a)
 {
   unsigned int i,j;
   uint16_t t;
 
   PolyCsubq(a);
 
-  for(i=0;i<KYBER_N/8;i++) {
+  for(i=0;i<N/8;i++) {
     msg[i] = 0;
     for(j=0;j<8;j++) {
-      t = ((((uint16_t)a->coeffs[8*i+j] << 1) + KYBER_Q/2)/KYBER_Q) & 1;
+      t = ((((uint16_t)a->coeffs[8*i+j] << 1) + Q/2)/Q) & 1;
       msg[i] |= t << j;
     }
   }
@@ -173,9 +179,10 @@ void Kyber::PolyToMsg(uint8_t msg[KYBER_INDCPA_MSGBYTES], poly *a)
 //Sample a polynomial deterministically from a seed and a nonce,
 //with output polynomial close to centered binomial distribution
 //with parameter KYBER_ETA
-void Kyber::PolyGetNoise(poly *r, const uint8_t seed[KYBER_SYMBYTES], uint8_t nonce)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyGetNoise(poly *r, const uint8_t *seed, uint8_t nonce)
 {
-  uint8_t buf[KYBER_ETA*KYBER_N/4];
+  uint8_t buf[ETA*N/4];
   Shake256Prf(buf, sizeof(buf), seed, nonce);
   Cbd(r, buf);
 }
@@ -183,7 +190,8 @@ void Kyber::PolyGetNoise(poly *r, const uint8_t seed[KYBER_SYMBYTES], uint8_t no
 //Computes negacyclic number-theoretic transform (NTT) of
 //a polynomial in place;
 //inputs assumed to be in normal order, output in bitreversed order
-void Kyber::PolyNtt(poly *r)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyNtt(poly *r)
 {
   Ntt(r->coeffs);
   PolyReduce(r);
@@ -193,16 +201,18 @@ void Kyber::PolyNtt(poly *r)
 //Computes inverse of negacyclic number-theoretic transform (NTT)
 //of a polynomial in place;
 //inputs assumed to be in bitreversed order, output in normal order
-void Kyber::PolyInvNttToMont(poly *r)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyInvNttToMont(poly *r)
 {
   InvNtt(r->coeffs);
 }
 
 //Multiplication of two polynomials in NTT domain
-void Kyber::PolyBasemulMontgomery(poly *r, const poly *a, const poly *b)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyBasemulMontgomery(poly *r, const poly *a, const poly *b)
 {
   unsigned int i;
-  for(i=0;i<KYBER_N/4;i++) {
+  for(i=0;i<N/4;i++) {
     Basemul(&r->coeffs[4*i], &a->coeffs[4*i], &b->coeffs[4*i], zetas[64+i]);
     Basemul(&r->coeffs[4*i+2], &a->coeffs[4*i+2], &b->coeffs[4*i+2],
             -zetas[64+i]);
@@ -212,182 +222,191 @@ void Kyber::PolyBasemulMontgomery(poly *r, const poly *a, const poly *b)
 
 //Inplace conversion of all coefficients of a polynomial
 //from normal domain to Montgomery domain
-void Kyber::PolyToMont(poly *r)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyToMont(poly *r)
 {
   unsigned int i;
-  const int16_t f = (1ULL << 32) % KYBER_Q;
-  for(i=0;i<KYBER_N;i++)
+  const int16_t f = (1ULL << 32) % Q;
+  for(i=0;i<N;i++)
     r->coeffs[i] = MontgomeryReduce((int32_t)r->coeffs[i]*f);
 }
 
 
 //Applies Barrett reduction to all coefficients of a polynomial
-void Kyber::PolyReduce(poly *r)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyReduce(poly *r)
 {
   unsigned int i;
-  for(i=0;i<KYBER_N;i++)
+  for(i=0;i<N;i++)
     r->coeffs[i] = BarrettReduce(r->coeffs[i]);
 }
 
 // Applies conditional subtraction of q to each coefficient
 // of a polynomial.
-void Kyber::PolyCsubq(poly *r)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyCsubq(poly *r)
 {
   unsigned int i;
-  for(i=0;i<KYBER_N;i++)
+  for(i=0;i<N;i++)
     r->coeffs[i] = Csubq(r->coeffs[i]);
 }
 
 
 //Add two polynomials
 
-void Kyber::PolyAdd(poly *r, const poly *a, const poly *b)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyAdd(poly *r, const poly *a, const poly *b)
 {
   unsigned int i;
-  for(i=0;i<KYBER_N;i++)
+  for(i=0;i<N;i++)
     r->coeffs[i] = a->coeffs[i] + b->coeffs[i];
 }
 
 
 //Subtract two polynomials
-void Kyber::PolySub(poly *r, const poly *a, const poly *b)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolySub(poly *r, const poly *a, const poly *b)
 {
   unsigned int i;
-  for(i=0;i<KYBER_N;i++)
+  for(i=0;i<N;i++)
     r->coeffs[i] = a->coeffs[i] - b->coeffs[i];
 }
 
 
 
 //Compress and serialize vector of polynomials
-void Kyber::PolyvecCompress(uint8_t r[KYBER_POLYVECCOMPRESSEDBYTES], polyvec *a)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyvecCompress(uint8_t *r, polyvec *a)
 {
   unsigned int i,j,k;
 
   PolyvecCsubq(a);
 
-#if (KYBER_POLYVECCOMPRESSEDBYTES == (KYBER_K * 352))
-  uint16_t t[8];
-  for(i=0;i<KYBER_K;i++) {
-    for(j=0;j<KYBER_N/8;j++) {
-      for(k=0;k<8;k++)
-        t[k] = ((((uint32_t)a->vec[i].coeffs[8*j+k] << 11) + KYBER_Q/2)
-                /KYBER_Q) & 0x7ff;
+  if (POLYVECCOMPRESSEDBYTES == (K * 352)) {
+    uint16_t t[8];
+    for(i=0;i<K;i++) {
+      for(j=0;j<N/8;j++) {
+        for(k=0;k<8;k++)
+          t[k] = ((((uint32_t)a->vec[i].coeffs[8*j+k] << 11) + Q/2)
+                  /Q) & 0x7ff;
 
-      r[ 0] = (t[0] >>  0);
-      r[ 1] = (t[0] >>  8) | (t[1] << 3);
-      r[ 2] = (t[1] >>  5) | (t[2] << 6);
-      r[ 3] = (t[2] >>  2);
-      r[ 4] = (t[2] >> 10) | (t[3] << 1);
-      r[ 5] = (t[3] >>  7) | (t[4] << 4);
-      r[ 6] = (t[4] >>  4) | (t[5] << 7);
-      r[ 7] = (t[5] >>  1);
-      r[ 8] = (t[5] >>  9) | (t[6] << 2);
-      r[ 9] = (t[6] >>  6) | (t[7] << 5);
-      r[10] = (t[7] >>  3);
-      r += 11;
+        r[ 0] = (t[0] >>  0);
+        r[ 1] = (t[0] >>  8) | (t[1] << 3);
+        r[ 2] = (t[1] >>  5) | (t[2] << 6);
+        r[ 3] = (t[2] >>  2);
+        r[ 4] = (t[2] >> 10) | (t[3] << 1);
+        r[ 5] = (t[3] >>  7) | (t[4] << 4);
+        r[ 6] = (t[4] >>  4) | (t[5] << 7);
+        r[ 7] = (t[5] >>  1);
+        r[ 8] = (t[5] >>  9) | (t[6] << 2);
+        r[ 9] = (t[6] >>  6) | (t[7] << 5);
+        r[10] = (t[7] >>  3);
+        r += 11;
+      }
     }
   }
-#elif (KYBER_POLYVECCOMPRESSEDBYTES == (KYBER_K * 320))
-  uint16_t t[4];
-  for(i=0;i<KYBER_K;i++) {
-    for(j=0;j<KYBER_N/4;j++) {
-      for(k=0;k<4;k++)
-        t[k] = ((((uint32_t)a->vec[i].coeffs[4*j+k] << 10) + KYBER_Q/2)
-                / KYBER_Q) & 0x3ff;
+  else if (POLYVECCOMPRESSEDBYTES == (K * 320)) {
+    uint16_t t[4];
+    for(i=0;i<K;i++) {
+      for(j=0;j<N/4;j++) {
+        for(k=0;k<4;k++)
+          t[k] = ((((uint32_t)a->vec[i].coeffs[4*j+k] << 10) + Q/2)
+                  / Q) & 0x3ff;
 
-      r[0] = (t[0] >> 0);
-      r[1] = (t[0] >> 8) | (t[1] << 2);
-      r[2] = (t[1] >> 6) | (t[2] << 4);
-      r[3] = (t[2] >> 4) | (t[3] << 6);
-      r[4] = (t[3] >> 2);
-      r += 5;
+        r[0] = (t[0] >> 0);
+        r[1] = (t[0] >> 8) | (t[1] << 2);
+        r[2] = (t[1] >> 6) | (t[2] << 4);
+        r[3] = (t[2] >> 4) | (t[3] << 6);
+        r[4] = (t[3] >> 2);
+        r += 5;
+      }
     }
   }
-#else
-#error "KYBER_POLYVECCOMPRESSEDBYTES needs to be in {320*KYBER_K, 352*KYBER_K}"
-#endif
+
 }
 
 
 //De-serialize and decompress vector of polynomials;
 //approximate inverse of polyvec_compress
-void Kyber::PolyvecDecompress(polyvec *r,
-                        const uint8_t a[KYBER_POLYVECCOMPRESSEDBYTES])
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyvecDecompress(polyvec *r, const uint8_t *a)
 {
   unsigned int i,j,k;
 
-#if (KYBER_POLYVECCOMPRESSEDBYTES == (KYBER_K * 352))
-  uint16_t t[8];
-  for(i=0;i<KYBER_K;i++) {
-    for(j=0;j<KYBER_N/8;j++) {
-      t[0] = (a[0] >> 0) | ((uint16_t)a[ 1] << 8);
-      t[1] = (a[1] >> 3) | ((uint16_t)a[ 2] << 5);
-      t[2] = (a[2] >> 6) | ((uint16_t)a[ 3] << 2) | ((uint16_t)a[4] << 10);
-      t[3] = (a[4] >> 1) | ((uint16_t)a[ 5] << 7);
-      t[4] = (a[5] >> 4) | ((uint16_t)a[ 6] << 4);
-      t[5] = (a[6] >> 7) | ((uint16_t)a[ 7] << 1) | ((uint16_t)a[8] << 9);
-      t[6] = (a[8] >> 2) | ((uint16_t)a[ 9] << 6);
-      t[7] = (a[9] >> 5) | ((uint16_t)a[10] << 3);
-      a += 11;
+  if (POLYVECCOMPRESSEDBYTES == (K * 352)) {
+    uint16_t t[8];
+    for(i=0;i<K;i++) {
+      for(j=0;j<N/8;j++) {
+        t[0] = (a[0] >> 0) | ((uint16_t)a[ 1] << 8);
+        t[1] = (a[1] >> 3) | ((uint16_t)a[ 2] << 5);
+        t[2] = (a[2] >> 6) | ((uint16_t)a[ 3] << 2) | ((uint16_t)a[4] << 10);
+        t[3] = (a[4] >> 1) | ((uint16_t)a[ 5] << 7);
+        t[4] = (a[5] >> 4) | ((uint16_t)a[ 6] << 4);
+        t[5] = (a[6] >> 7) | ((uint16_t)a[ 7] << 1) | ((uint16_t)a[8] << 9);
+        t[6] = (a[8] >> 2) | ((uint16_t)a[ 9] << 6);
+        t[7] = (a[9] >> 5) | ((uint16_t)a[10] << 3);
+        a += 11;
 
-      for(k=0;k<8;k++)
-        r->vec[i].coeffs[8*j+k] = ((uint32_t)(t[k] & 0x7FF)*KYBER_Q + 1024) >> 11;
+        for(k=0;k<8;k++)
+          r->vec[i].coeffs[8*j+k] = ((uint32_t)(t[k] & 0x7FF)*Q + 1024) >> 11;
+      }
     }
   }
-#elif (KYBER_POLYVECCOMPRESSEDBYTES == (KYBER_K * 320))
-  uint16_t t[4];
-  for(i=0;i<KYBER_K;i++) {
-    for(j=0;j<KYBER_N/4;j++) {
-      t[0] = (a[0] >> 0) | ((uint16_t)a[1] << 8);
-      t[1] = (a[1] >> 2) | ((uint16_t)a[2] << 6);
-      t[2] = (a[2] >> 4) | ((uint16_t)a[3] << 4);
-      t[3] = (a[3] >> 6) | ((uint16_t)a[4] << 2);
-      a += 5;
+  else if (POLYVECCOMPRESSEDBYTES == (K * 320)) {
+    uint16_t t[4];
+    for(i=0;i<K;i++) {
+      for(j=0;j<N/4;j++) {
+        t[0] = (a[0] >> 0) | ((uint16_t)a[1] << 8);
+        t[1] = (a[1] >> 2) | ((uint16_t)a[2] << 6);
+        t[2] = (a[2] >> 4) | ((uint16_t)a[3] << 4);
+        t[3] = (a[3] >> 6) | ((uint16_t)a[4] << 2);
+        a += 5;
 
-      for(k=0;k<4;k++)
-        r->vec[i].coeffs[4*j+k] = ((uint32_t)(t[k] & 0x3FF)*KYBER_Q + 512) >> 10;
+        for(k=0;k<4;k++)
+          r->vec[i].coeffs[4*j+k] = ((uint32_t)(t[k] & 0x3FF)*Q + 512) >> 10;
+      }
     }
   }
-#else
-#error "KYBER_POLYVECCOMPRESSEDBYTES needs to be in {320*KYBER_K, 352*KYBER_K}"
-#endif
 }
 
 
 //Description: Serialize vector of polynomials
-void Kyber::PolyvecToBytes(uint8_t r[KYBER_POLYVECBYTES], polyvec *a)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyvecToBytes(uint8_t *r, polyvec *a)
 {
   unsigned int i;
-  for(i=0;i<KYBER_K;i++)
-    PolyToBytes(r+i*KYBER_POLYBYTES, &a->vec[i]);
+  for(i=0;i<K;i++)
+    PolyToBytes(r+i*POLYBYTES, &a->vec[i]);
 }
 
 //De-serialize vector of polynomials;
 //inverse of polyvec_tobytes
 
-void Kyber::PolyvecFromBytes(polyvec *r, const uint8_t a[KYBER_POLYVECBYTES])
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyvecFromBytes(polyvec *r, const uint8_t *a)
 {
   unsigned int i;
-  for(i=0;i<KYBER_K;i++)
-    PolyFromBytes(&r->vec[i], a+i*KYBER_POLYBYTES);
+  for(i=0;i<K;i++)
+    PolyFromBytes(&r->vec[i], a+i*POLYBYTES);
 }
 
 //Apply forward NTT to all elements of a vector of polynomials
-void Kyber::PolyvecNtt(polyvec *r)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyvecNtt(polyvec *r)
 {
   unsigned int i;
-  for(i=0;i<KYBER_K;i++)
+  for(i=0;i<K;i++)
     PolyNtt(&r->vec[i]);
 }
 
 //Apply inverse NTT to all elements of a vector of polynomials
 //and multiply by Montgomery factor 2^16
 
-void Kyber::PolyvecInvNttToMont(polyvec *r)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyvecInvNttToMont(polyvec *r)
 {
   unsigned int i;
-  for(i=0;i<KYBER_K;i++)
+  for(i=0;i<K;i++)
     PolyInvNttToMont(&r->vec[i]);
 }
 
@@ -395,15 +414,14 @@ void Kyber::PolyvecInvNttToMont(polyvec *r)
 //Pointwise multiply elements of a and b, accumulate into r,
 //and multiply by 2^-16.
 
-void Kyber::PolyvecPointwiseAccMontgomery(poly *r,
-                                      const polyvec *a,
-                                      const polyvec *b)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyvecPointwiseAccMontgomery(poly *r, const polyvec *a, const polyvec *b)
 {
   unsigned int i;
   poly t;
 
   PolyBasemulMontgomery(r, &a->vec[0], &b->vec[0]);
-  for(i=1;i<KYBER_K;i++) {
+  for(i=1;i<K;i++) {
     PolyBasemulMontgomery(&t, &a->vec[i], &b->vec[i]);
     PolyAdd(r, r, &t);
   }
@@ -414,27 +432,30 @@ void Kyber::PolyvecPointwiseAccMontgomery(poly *r,
 
 //Applies Barrett reduction to each coefficient
 //of each element of a vector of polynomials
-void Kyber::PolyvecReduce(polyvec *r)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyvecReduce(polyvec *r)
 {
   unsigned int i;
-  for(i=0;i<KYBER_K;i++)
+  for(i=0;i<K;i++)
     PolyReduce(&r->vec[i]);
 }
 
 //Applies conditional subtraction of q to each coefficient
 //of each element of a vector of polynomials
-void Kyber::PolyvecCsubq(polyvec *r)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyvecCsubq(polyvec *r)
 {
   unsigned int i;
-  for(i=0;i<KYBER_K;i++)
+  for(i=0;i<K;i++)
     PolyCsubq(&r->vec[i]);
 }
 
 //Add vectors of polynomials
-void Kyber::PolyvecAdd(polyvec *r, const polyvec *a, const polyvec *b)
+template<int T_K, unsigned int T_Compr>
+void Kyber<T_K, T_Compr>::PolyvecAdd(polyvec *r, const polyvec *a, const polyvec *b)
 {
   unsigned int i;
-  for(i=0;i<KYBER_K;i++)
+  for(i=0;i<K;i++)
     PolyAdd(&r->vec[i], &a->vec[i], &b->vec[i]);
 }
 
@@ -442,7 +463,9 @@ void Kyber::PolyvecAdd(polyvec *r, const polyvec *a, const polyvec *b)
 
 
 
-
+template class Kyber<2, 320>;
+template class Kyber<3, 320>;
+template class Kyber<4, 352>;
 
 
 

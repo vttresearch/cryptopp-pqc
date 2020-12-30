@@ -810,9 +810,6 @@
     <ClInclude Include="kyber.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kyber_params.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="lubyrack.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -487,7 +487,6 @@
     <ClInclude Include="kalyna.h" />
     <ClInclude Include="keccak.h" />
     <ClInclude Include="kyber.h" />
-    <ClInclude Include="kyber_params.h" />
     <ClInclude Include="lubyrack.h" />
     <ClInclude Include="lea.h" />
     <ClInclude Include="luc.h" />
