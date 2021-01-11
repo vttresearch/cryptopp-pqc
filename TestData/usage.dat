@@ -79,3 +79,6 @@ Test Driver for Crypto++(R) Library, a C++ Class Library of Cryptographic Scheme
 
 - To run benchmarks
 	cryptest b [time allocated for each benchmark in seconds] [frequency of CPU in gigahertz]
+
+- To run Kyber tests
+	cryptest k
