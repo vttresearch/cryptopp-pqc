@@ -2,6 +2,7 @@
 implementation of kyber by the CRYSTALS team 
 (https://github.com/pq-crystals/kyber) */
 
+#include "pch.h"
 #include "kyber.h"
 
 #include "sha3.h"
@@ -269,8 +270,8 @@ template<int T_K, unsigned int T_Compr>
 void Kyber<T_K,T_Compr>::GenMatrix(polyvec *a, const uint8_t *seed, int transposed)
 {
   unsigned int ctr, i, j;
-  int xof_blockbytes = 168;
-  size_t gen_matrix_nblocks = ((2*N*(1U << 16)/(19*Q) + xof_blockbytes)/xof_blockbytes);
+  const int xof_blockbytes = 168;
+  const size_t gen_matrix_nblocks = ((2*N*(1U << 16)/(19*Q) + xof_blockbytes)/xof_blockbytes);
   uint8_t buf[gen_matrix_nblocks*xof_blockbytes];
   keccak_state state;
 

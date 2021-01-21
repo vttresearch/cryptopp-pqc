@@ -3,6 +3,7 @@ Adapted from the reference
 implementation of kyber by the CRYSTALS team 
 (https://github.com/pq-crystals/kyber) */
 
+#include "pch.h"
 #include "kyber.h"
 
 NAMESPACE_BEGIN(CryptoPP)

@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include "pch.h"
 #include "kyber.h"
 #include "shake.h"
 
