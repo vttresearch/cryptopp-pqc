@@ -512,9 +512,15 @@
     <ClCompile Include="kyber_test.cpp">
       <Filter>Source Code</Filter>
     </ClCompile>
+    <ClCompile Include="dilithium_test.cpp">
+      <Filter>Source Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bench.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dilithium_test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="factory.h">

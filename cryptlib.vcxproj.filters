@@ -143,6 +143,18 @@
     <ClCompile Include="dh2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dilithium.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dilithium_ntt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dilithium_poly.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dilithium_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="dll.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -679,6 +691,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dh2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dilithium.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dmac.h">

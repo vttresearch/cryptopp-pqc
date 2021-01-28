@@ -208,6 +208,7 @@
     <ClCompile Include="bench2.cpp" />
     <ClCompile Include="bench3.cpp" />
     <ClCompile Include="datatest.cpp" />
+    <ClCompile Include="dilithium_test.cpp" />
     <ClCompile Include="dlltest.cpp" />
     <ClCompile Include="fipsalgt.cpp" />
     <ClCompile Include="kyber_test.cpp" />
@@ -230,6 +231,7 @@
   <!-- Header Files -->
   <ItemGroup>
     <ClInclude Include="bench.h" />
+    <ClInclude Include="dilithium_test.h" />
     <ClInclude Include="factory.h" />
     <ClInclude Include="kyber_test.h" />
     <ClInclude Include="validate.h" />

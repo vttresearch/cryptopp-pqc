@@ -212,6 +212,10 @@
     <ClCompile Include="dessp.cpp" />
     <ClCompile Include="dh.cpp" />
     <ClCompile Include="dh2.cpp" />
+    <ClCompile Include="dilithium.cpp" />
+    <ClCompile Include="dilithium_ntt.cpp" />
+    <ClCompile Include="dilithium_poly.cpp" />
+    <ClCompile Include="dilithium_utils.cpp" />
     <ClCompile Include="dll.cpp">
       <PrecompiledHeader />
     </ClCompile>
@@ -444,6 +448,7 @@
     <ClInclude Include="des.h" />
     <ClInclude Include="dh.h" />
     <ClInclude Include="dh2.h" />
+    <ClInclude Include="dilithium.h" />
     <ClInclude Include="dmac.h" />
     <ClInclude Include="drbg.h" />
     <ClInclude Include="donna.h" />
