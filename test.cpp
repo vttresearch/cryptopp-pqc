@@ -33,6 +33,8 @@
 
 //Kyber tests
 #include "kyber_test.h"
+//Dilithium tests
+#include "dilithium_test.h"
 
 #include <iostream>
 #include <sstream>
@@ -439,6 +441,11 @@ int scoped_main(int argc, char *argv[])
 		else if (command == "k") 
 		{
 			RunKyberTests();
+		} 
+		//Testing Dilithium
+		else if (command == "dilithium")
+		{
+			RunDilithiumTests();
 		}
 		else
 		{

@@ -108,6 +108,11 @@ dh.cpp
 dh.h
 dh2.cpp
 dh2.h
+dilithium.cpp
+dilithium.h
+dilithium_ntt.cpp
+dilithium_poly.cpp
+dilithium_utils.cpp
 dll.cpp
 dll.h
 dlltest.cpp

@@ -82,3 +82,6 @@ Test Driver for Crypto++(R) Library, a C++ Class Library of Cryptographic Scheme
 
 - To run Kyber tests
 	cryptest k
+
+- To run Dilithium tests
+	cryptest dilithium

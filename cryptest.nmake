@@ -63,7 +63,7 @@ LIB_SRCS = \
     cast.cpp casts.cpp cbcmac.cpp ccm.cpp chacha.cpp chacha_avx.cpp \
     chacha_simd.cpp chachapoly.cpp cham.cpp cham_simd.cpp channels.cpp \
     cmac.cpp crc.cpp crc_simd.cpp darn.cpp default.cpp des.cpp dessp.cpp \
-    dh.cpp dh2.cpp dll.cpp donna_32.cpp donna_64.cpp donna_sse.cpp dsa.cpp \
+    dh.cpp dh2.cpp dilithium.cpp dilithium_ntt.cpp dilithium_poly.cpp dilithium_utils.cpp dll.cpp donna_32.cpp donna_64.cpp donna_sse.cpp dsa.cpp \
     eax.cpp ec2n.cpp eccrypto.cpp ecp.cpp elgamal.cpp emsa2.cpp eprecomp.cpp \
     esign.cpp files.cpp filters.cpp fips140.cpp fipstest.cpp gcm.cpp \
     gcm_simd.cpp gf256.cpp gf2_32.cpp gf2n.cpp gf2n_simd.cpp gfpcrypt.cpp \
@@ -94,7 +94,7 @@ LIB_OBJS = \
     cast.obj casts.obj cbcmac.obj ccm.obj chacha.obj chacha_avx.obj \
     chacha_simd.obj chachapoly.obj cham.obj cham_simd.obj channels.obj \
     cmac.obj crc.obj crc_simd.obj darn.obj default.obj des.obj dessp.obj \
-    dh.obj dh2.obj dll.obj donna_32.obj donna_64.obj donna_sse.obj dsa.obj \
+    dh.obj dh2.obj dilithium.obj dilithium_ntt.obj dilithium_poly.obj dilithium_utils.dll dll.obj donna_32.obj donna_64.obj donna_sse.obj dsa.obj \
     eax.obj ec2n.obj eccrypto.obj ecp.obj elgamal.obj emsa2.obj eprecomp.obj \
     esign.obj files.obj filters.obj fips140.obj fipstest.obj gcm.obj \
     gcm_simd.obj gf256.obj gf2_32.obj gf2n.obj gf2n_simd.obj gfpcrypt.obj \
@@ -125,14 +125,14 @@ TEST_SRCS = \
     dlltest.cpp fipsalgt.cpp validat0.cpp validat1.cpp validat2.cpp \
     validat3.cpp validat4.cpp validat5.cpp validat6.cpp validat7.cpp \
     validat8.cpp validat9.cpp validat10.cpp regtest1.cpp regtest2.cpp \
-    regtest3.cpp regtest4.cpp kyber_test.cpp
+    regtest3.cpp regtest4.cpp kyber_test.cpp dilithium_test.cpp
 
 TEST_OBJS = \
     test.obj bench1.obj bench2.obj bench3.obj datatest.obj \
     dlltest.obj fipsalgt.obj validat0.obj validat1.obj validat2.obj \
     validat3.obj validat4.obj validat5.obj validat6.obj validat7.obj \
     validat8.obj validat9.obj validat10.obj regtest1.obj regtest2.obj \
-    regtest3.obj regtest4.obj kyber_test.obj
+    regtest3.obj regtest4.obj kyber_test.obj dilithium_test.obj
 
 CXX = cl.exe
 LD = link.exe
@@ -358,6 +358,8 @@ chacha_avx.obj:
 #validat10.obj:
 #	$(CXX) $(CXXFLAGS) $(CXXFLAGS_IMPORTS) /c $?
 #kyber_test.obj:
+#	$(CXX) $(CXXFLAGS) $(CXXFLAGS_IMPORTS) /c $?
+#dilithium_test.obj:
 #	$(CXX) $(CXXFLAGS) $(CXXFLAGS_IMPORTS) /c $?
 
 # For testing cryptopp.dll and CRYPTOPP_EXPORTS
