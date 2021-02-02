@@ -11,6 +11,11 @@ implementation of Dilithium by the CRYSTALS team
 
 NAMESPACE_BEGIN(CryptoPP)
 
+#define SHAKE128_RATE (168)
+#define SHAKE256_RATE (136)
+#define SHA3_128_RATE (72)
+#define SHA3_256_RATE (168)
+
 class Dilithium
 {
 public:
@@ -67,12 +72,6 @@ private:
         word64 s[25];
         word32 pos;
     } keccakState;
-
-    //Shake and Sha3 rates
-    const byte mSHAKE128_RATE = 168;
-    const byte mSHAKE256_RATE = 136;
-    const byte mSHA3_256_RATE = 136;
-    const byte mSHA3_512_RATE = 72;
 
     void Challenge(poly *c, const byte *mu, const polyvec *w1);
 

@@ -678,7 +678,7 @@ void Dilithium::Shake128Init(keccakState *state)
 */
 void Dilithium::Shake128Absorb(keccakState *state, const byte *in, size_t inLen)
 {
-  state->pos = KeccakAbsorb(state->s, mSHAKE128_RATE, state->pos, in, inLen);
+  state->pos = KeccakAbsorb(state->s, SHAKE128_RATE, state->pos, in, inLen);
 }
 
 /*
@@ -688,7 +688,7 @@ void Dilithium::Shake128Absorb(keccakState *state, const byte *in, size_t inLen)
 */
 void Dilithium::Shake128Finalize(keccakState *state)
 {
-  KeccakFinalize(state->s, mSHAKE128_RATE, state->pos, 0x1F);
+  KeccakFinalize(state->s, SHAKE128_RATE, state->pos, 0x1F);
   state->pos = 0;
 }
 
@@ -704,7 +704,7 @@ void Dilithium::Shake128Finalize(keccakState *state)
 */
 void Dilithium::Shake128SqueezeBlocks(byte *out, size_t nBlocks, keccakState *state)
 {
-  KeccakSqueezeBlocks(out, nBlocks, state->s, mSHAKE128_RATE);
+  KeccakSqueezeBlocks(out, nBlocks, state->s, SHAKE128_RATE);
 }
 
 /*
@@ -718,7 +718,7 @@ void Dilithium::Shake128SqueezeBlocks(byte *out, size_t nBlocks, keccakState *st
 **************************************************/
 void Dilithium::Shake128Squeeze(byte *out, size_t outLen, keccakState *state)
 {
-  state->pos = KeccakSqueeze(out, outLen, state->s, mSHAKE128_RATE, state->pos);
+  state->pos = KeccakSqueeze(out, outLen, state->s, SHAKE128_RATE, state->pos);
 }
 
 /*
@@ -740,7 +740,7 @@ void Dilithium::Shake256Init(keccakState *state)
 */
 void Dilithium::Shake256Absorb(keccakState *state, const byte *in, size_t inLen)
 {
-  state->pos = KeccakAbsorb(state->s, mSHAKE256_RATE, state->pos, in, inLen);
+  state->pos = KeccakAbsorb(state->s, SHAKE256_RATE, state->pos, in, inLen);
 }
 
 /*
@@ -750,7 +750,7 @@ void Dilithium::Shake256Absorb(keccakState *state, const byte *in, size_t inLen)
 */
 void Dilithium::Shake256Finalize(keccakState *state)
 {
-  KeccakFinalize(state->s, mSHAKE256_RATE, state->pos, 0x1F);
+  KeccakFinalize(state->s, SHAKE256_RATE, state->pos, 0x1F);
   state->pos = 0;
 }
 
@@ -767,7 +767,7 @@ void Dilithium::Shake256Finalize(keccakState *state)
 */
 void Dilithium::Shake256SqueezeBlocks(byte *out, size_t nBlocks, keccakState *state)
 {
-  KeccakSqueezeBlocks(out, nBlocks, state->s, mSHAKE256_RATE);
+  KeccakSqueezeBlocks(out, nBlocks, state->s, SHAKE256_RATE);
 }
 
 /*
@@ -781,7 +781,7 @@ void Dilithium::Shake256SqueezeBlocks(byte *out, size_t nBlocks, keccakState *st
 */
 void Dilithium::Shake256Squeeze(byte *out, size_t outLen, keccakState *state)
 {
-  state->pos = KeccakSqueeze(out, outLen, state->s, mSHAKE256_RATE, state->pos);
+  state->pos = KeccakSqueeze(out, outLen, state->s, SHAKE256_RATE, state->pos);
 }
 
 

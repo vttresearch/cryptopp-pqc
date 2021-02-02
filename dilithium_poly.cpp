@@ -295,8 +295,8 @@ word32 Dilithium::RejUniform(word32 *a, word32 len, const byte *buf, word32 bufL
 void Dilithium::PolyUniform(poly *a, const byte *seed, word16 nonce)
 {
   word32 i, ctr, off;
-  word32 bufLen = POLY_UNIFORM_NBLOCKS*mSHAKE128_RATE;
-  byte buf[POLY_UNIFORM_NBLOCKS*mSHAKE128_RATE + 2];
+  word32 bufLen = POLY_UNIFORM_NBLOCKS*SHAKE128_RATE;
+  byte buf[POLY_UNIFORM_NBLOCKS*SHAKE128_RATE + 2];
   keccakState state;
 
   Shake128StreamInit(&state, seed, nonce);
@@ -309,7 +309,7 @@ void Dilithium::PolyUniform(poly *a, const byte *seed, word16 nonce)
     for(i = 0; i < off; ++i)
       buf[i] = buf[bufLen - off + i];
 
-    bufLen = mSHAKE128_RATE + off;
+    bufLen = SHAKE128_RATE + off;
     Shake128SqueezeBlocks(buf + off, 1, &state);
     ctr += RejUniform(a->data() + ctr, mN - ctr, buf, bufLen);
   }
@@ -365,8 +365,8 @@ word32 Dilithium::RejEta(word32 *a, word32 len, const byte *buf, word32 bufLen)
 void Dilithium::PolyUniformEta(poly *a, const byte *seed, word16 nonce)
 {
   word32 ctr;
-  word32 bufLen = POLY_UNIFORM_ETA_NBLOCKS*mSHAKE128_RATE;
-  byte buf[POLY_UNIFORM_ETA_NBLOCKS*mSHAKE128_RATE];
+  word32 bufLen = POLY_UNIFORM_ETA_NBLOCKS*SHAKE128_RATE;
+  byte buf[POLY_UNIFORM_ETA_NBLOCKS*SHAKE128_RATE];
   keccakState state;
 
   Shake128StreamInit(&state, seed, nonce);
@@ -376,7 +376,7 @@ void Dilithium::PolyUniformEta(poly *a, const byte *seed, word16 nonce)
 
   while(ctr < mN) {
     Shake128SqueezeBlocks(buf, 1, &state);
-    ctr += RejEta(a->data() + ctr, mN - ctr, buf, mSHAKE128_RATE);
+    ctr += RejEta(a->data() + ctr, mN - ctr, buf, SHAKE128_RATE);
   }
 }
 
@@ -434,8 +434,8 @@ word32 Dilithium::RejGamma1m1(word32 *a, word32 len, const byte *buf, word32 buf
 void Dilithium::PolyUniformGamma1m1(poly *a, const byte *seed, word16 nonce)
 {
   word32 i, ctr, off;
-  word32 bufLen = POLY_UNIFORM_GAMMA1M1_NBLOCKS*mSHAKE256_RATE;
-  byte buf[POLY_UNIFORM_GAMMA1M1_NBLOCKS*mSHAKE256_RATE + 4];
+  word32 bufLen = POLY_UNIFORM_GAMMA1M1_NBLOCKS*SHAKE256_RATE;
+  byte buf[POLY_UNIFORM_GAMMA1M1_NBLOCKS*SHAKE256_RATE + 4];
   keccakState state;
 
   Shake256StreamInit(&state, seed, nonce);
@@ -448,7 +448,7 @@ void Dilithium::PolyUniformGamma1m1(poly *a, const byte *seed, word16 nonce)
     for(i = 0; i < off; ++i)
       buf[i] = buf[bufLen - off + i];
 
-    bufLen = mSHAKE256_RATE + off;
+    bufLen = SHAKE256_RATE + off;
     Shake256SqueezeBlocks(buf + off, 1, &state);
     ctr += RejGamma1m1(a->data() + ctr, mN - ctr, buf, bufLen);
   }

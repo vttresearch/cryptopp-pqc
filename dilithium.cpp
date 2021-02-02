@@ -24,25 +24,27 @@ void Dilithium::Challenge(poly *c, const byte *mu, const polyvec *w1)
 {
   word32 i, b, pos;
   word64 signs;
-  const word32 bufLen = mCrhBytes + mK*mPolyw1PackedBytes;
-  byte buf[bufLen];
+  word32 bufLen = mCrhBytes + mK*mPolyw1PackedBytes;
+  //byte buf[bufLen];
+  std::vector<byte> bufVector (bufLen);
+  std::vector<byte> *buf = &bufVector; 
   keccakState state;
 
   for(i = 0; i < mCrhBytes; ++i)
-    buf[i] = mu[i];
+    buf->at(i) = mu[i];
   for(i = 0; i < mK; ++i)
-    Polyw1Pack(buf + mCrhBytes + i*mPolyw1PackedBytes, &w1->at(i));
+    Polyw1Pack(buf->data() + mCrhBytes + i*mPolyw1PackedBytes, &w1->at(i));
 
   Shake256Init(&state);
-  Shake256Absorb(&state, buf, sizeof(buf));
+  Shake256Absorb(&state, buf->data(), bufLen);
   Shake256Finalize(&state);
-  Shake256SqueezeBlocks(buf, 1, &state);
+  Shake256SqueezeBlocks(buf->data(), 1, &state);
 
 
 
   signs = 0;
   for(i = 0; i < 8; ++i)
-    signs |= (word64)buf[i] << 8*i;
+    signs |= (word64)buf->at(i) << 8*i;
 
   pos = 8;
 
@@ -51,12 +53,12 @@ void Dilithium::Challenge(poly *c, const byte *mu, const polyvec *w1)
 
   for(i = 196; i < 256; ++i) {
     do {
-      if(pos >= mSHAKE256_RATE) {
-        Shake256SqueezeBlocks(buf, 1, &state);
+      if(pos >= SHAKE256_RATE) {
+        Shake256SqueezeBlocks(buf->data(), 1, &state);
         pos = 0;
       }
 
-      b = buf[pos++];
+      b = buf->at(pos++);
     } while(b > i);
 
     c->at(i) = c->at(b);
@@ -78,8 +80,12 @@ void Dilithium::Challenge(poly *c, const byte *mu, const polyvec *w1)
 */
 int Dilithium::Keypair(byte *pk, byte *sk) {
   unsigned int i;
-  byte seedbuf[3*mSeedBytes];
-  byte tr[mCrhBytes];
+  //byte seedbuf[3*mSeedBytes];
+  std::vector<byte> seedBufVector(3*mSeedBytes);
+  std::vector<byte> *seedBuf = &seedBufVector;
+  //byte tr[mCrhBytes];
+  std::vector<byte> trVector(mCrhBytes);
+  std::vector<byte> *tr = &trVector;
   const byte *rho, *rhoprime, *key;
   word16 nonce = 0;
 
@@ -89,10 +95,10 @@ int Dilithium::Keypair(byte *pk, byte *sk) {
   polyvec s2 (mK), t1 (mK), t0 (mK);
 
   /* Get randomness for rho, rhoprime and key */
-  RandomBytes(seedbuf, 3*mSeedBytes);
-  rho = seedbuf;
-  rhoprime = seedbuf + mSeedBytes;
-  key = seedbuf + 2*mSeedBytes;
+  RandomBytes(seedBuf->data(), 3*mSeedBytes);
+  rho = seedBuf->data();
+  rhoprime = seedBuf->data() + mSeedBytes;
+  key = seedBuf->data() + 2*mSeedBytes;
 
   /* Expand matrix */
   ExpandMat(&mat, rho);
@@ -123,8 +129,8 @@ int Dilithium::Keypair(byte *pk, byte *sk) {
   /* Compute CRH(rho, t1) and write secret key */
   SHAKE256 shake = SHAKE256(mCrhBytes);
   shake.Update(pk, mPublicKeyBytes);
-  shake.Final(tr);
-  PackSk(sk, rho, key, tr, &s1, &s2, &t0);
+  shake.Final(tr->data());
+  PackSk(sk, rho, key, tr->data(), &s1, &s2, &t0);
 
   return 0;
 }
@@ -143,7 +149,9 @@ int Dilithium::Keypair(byte *pk, byte *sk) {
 int Dilithium::Signature(byte *sig, size_t *sigLen, const byte *m, size_t mLen, const byte *sk)
 {
   unsigned int i, n;
-  byte seedbuf[2*mSeedBytes + 3*mCrhBytes];
+  //byte seedbuf[2*mSeedBytes + 3*mCrhBytes];
+  std::vector<byte> seedBufVector(2*mSeedBytes + 3*mCrhBytes);
+  std::vector<byte> *seedBuf = &seedBufVector;
   byte *rho, *tr, *key, *mu, *rhoprime;
   word16 nonce = 0;
   poly c, chat;
@@ -153,7 +161,7 @@ int Dilithium::Signature(byte *sig, size_t *sigLen, const byte *m, size_t mLen, 
   polyvec t0 (mK), s2 (mK), w1 (mK), w0 (mK), h (mK);
   keccakState state;
 
-  rho = seedbuf;
+  rho = seedBuf->data();
   tr = rho + mSeedBytes;
   key = tr + mCrhBytes;
   mu = key + mSeedBytes;
@@ -297,8 +305,11 @@ int Dilithium::Sign(byte *sm, size_t *smLen, const byte *m, size_t mLen, const b
 int Dilithium::Verify(const byte *sig, size_t sigLen, const byte *m, size_t mLen, const byte *pk)
 {
   unsigned int i;
-  byte rho[mSeedBytes];
-  byte mu[mCrhBytes];
+  //byte rho[mSeedBytes];
+  std::vector<byte> rhoVector(mSeedBytes);
+  std::vector<byte> *rho = &rhoVector;
+  std::vector<byte> muVector(mCrhBytes);
+  std::vector<byte> *mu = &muVector;
   poly c, cp;
   polyvec matPolyvec(mL);
   std::vector<polyvec> mat(mK, matPolyvec);
@@ -309,7 +320,7 @@ int Dilithium::Verify(const byte *sig, size_t sigLen, const byte *m, size_t mLen
   if(sigLen != mBytes)
     return -1;
 
-  UnpackPk(rho, &t1, pk);
+  UnpackPk(rho->data(), &t1, pk);
   if(UnpackSig(&z, &h, &c, sig))
     return -1;
   if(PolyvecChkNorm(&z, mGamma1 - mBeta, mL))
@@ -318,17 +329,17 @@ int Dilithium::Verify(const byte *sig, size_t sigLen, const byte *m, size_t mLen
   /* Compute CRH(CRH(rho, t1), msg) */
   SHAKE256 shake = SHAKE256(mCrhBytes);
   shake.Update(pk, mPublicKeyBytes);
-  shake.Final(mu);
+  shake.Final(mu->data());
   
   //TODO: VOiko vaihtaa CryptoPP:n shakella
   Shake256Init(&state);
-  Shake256Absorb(&state, mu, mCrhBytes);
+  Shake256Absorb(&state, mu->data(), mCrhBytes);
   Shake256Absorb(&state, m, mLen);
   Shake256Finalize(&state);
-  Shake256Squeeze(mu, mCrhBytes, &state);
+  Shake256Squeeze(mu->data(), mCrhBytes, &state);
 
   /* Matrix-vector multiplication; compute Az - c2^dt1 */
-  ExpandMat(&mat, rho);
+  ExpandMat(&mat, rho->data());
 
   PolyvecNtt(&z, mL);
   for(i = 0; i < mK ; ++i)
@@ -350,7 +361,7 @@ int Dilithium::Verify(const byte *sig, size_t sigLen, const byte *m, size_t mLen
   PolyvecUseHint(&w1, &w1, &h, mK);
 
   /* Call random oracle and verify challenge */
-  Challenge(&cp, mu, &w1);
+  Challenge(&cp, mu->data(), &w1);
   for(i = 0; i < mN; ++i)
     if(c.at(i) != cp.at(i))
       return -1;
