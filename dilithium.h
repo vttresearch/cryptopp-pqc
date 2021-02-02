@@ -7,6 +7,7 @@ implementation of Dilithium by the CRYSTALS team
 #define CRYPTOPP_DILITHIUM_H
 
 #include "cryptlib.h"
+#include <array>
 
 
 NAMESPACE_BEGIN(CryptoPP)
