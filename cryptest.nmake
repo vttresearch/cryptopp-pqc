@@ -76,7 +76,7 @@ LIB_SRCS = \
     ppc_power8.cpp ppc_power9.cpp ppc_simd.cpp pssr.cpp pubkey.cpp queue.cpp \
     rabbit.cpp rabin.cpp randpool.cpp rc2.cpp rc5.cpp rc6.cpp rdrand.cpp \
     rdtables.cpp rijndael.cpp rijndael_simd.cpp ripemd.cpp rng.cpp rsa.cpp \
-    rw.cpp safer.cpp salsa.cpp scrypt.cpp seal.cpp seed.cpp serpent.cpp \
+    rw.cpp saber.cpp saber_poly.cpp saber_utils.cpp safer.cpp salsa.cpp scrypt.cpp seal.cpp seed.cpp serpent.cpp \
     sha.cpp sha3.cpp sha_simd.cpp shacal2.cpp shacal2_simd.cpp shake.cpp \
     shark.cpp sharkbox.cpp simeck.cpp simon.cpp \
     simon128_simd.cpp skipjack.cpp sm3.cpp sm4.cpp \
@@ -107,7 +107,7 @@ LIB_OBJS = \
     ppc_power8.obj ppc_power9.obj ppc_simd.obj pssr.obj pubkey.obj queue.obj \
     rabbit.obj rabin.obj randpool.obj rc2.obj rc5.obj rc6.obj rdrand.obj \
     rdtables.obj rijndael.obj rijndael_simd.obj ripemd.obj rng.obj rsa.obj \
-    rw.obj safer.obj salsa.obj scrypt.obj seal.obj seed.obj serpent.obj \
+    rw.obj saber.obj saber_poly.obj saber_utils.obj safer.obj salsa.obj scrypt.obj seal.obj seed.obj serpent.obj \
     sha.obj sha3.obj sha_simd.obj shacal2.obj shacal2_simd.obj shake.obj \
     shark.obj sharkbox.obj simeck.obj simon.obj \
     simon128_simd.obj skipjack.obj sm3.obj sm4.obj \
@@ -125,14 +125,14 @@ TEST_SRCS = \
     dlltest.cpp fipsalgt.cpp validat0.cpp validat1.cpp validat2.cpp \
     validat3.cpp validat4.cpp validat5.cpp validat6.cpp validat7.cpp \
     validat8.cpp validat9.cpp validat10.cpp regtest1.cpp regtest2.cpp \
-    regtest3.cpp regtest4.cpp kyber_test.cpp dilithium_test.cpp
+    regtest3.cpp regtest4.cpp kyber_test.cpp dilithium_test.cpp saber_test.cpp
 
 TEST_OBJS = \
     test.obj bench1.obj bench2.obj bench3.obj datatest.obj \
     dlltest.obj fipsalgt.obj validat0.obj validat1.obj validat2.obj \
     validat3.obj validat4.obj validat5.obj validat6.obj validat7.obj \
     validat8.obj validat9.obj validat10.obj regtest1.obj regtest2.obj \
-    regtest3.obj regtest4.obj kyber_test.obj dilithium_test.obj
+    regtest3.obj regtest4.obj kyber_test.obj dilithium_test.obj saber_test.obj
 
 CXX = cl.exe
 LD = link.exe
@@ -360,6 +360,8 @@ chacha_avx.obj:
 #kyber_test.obj:
 #	$(CXX) $(CXXFLAGS) $(CXXFLAGS_IMPORTS) /c $?
 #dilithium_test.obj:
+#	$(CXX) $(CXXFLAGS) $(CXXFLAGS_IMPORTS) /c $?
+#saber_test.obj:
 #	$(CXX) $(CXXFLAGS) $(CXXFLAGS_IMPORTS) /c $?
 
 # For testing cryptopp.dll and CRYPTOPP_EXPORTS

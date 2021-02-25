@@ -305,6 +305,10 @@ rsa.cpp
 rsa.h
 rw.cpp
 rw.h
+saber.cpp
+saber.h
+saber_poly.cpp
+saber_utils.cpp
 safer.cpp
 safer.h
 salsa.cpp

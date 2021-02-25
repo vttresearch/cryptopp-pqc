@@ -35,6 +35,8 @@
 #include "kyber_test.h"
 //Dilithium tests
 #include "dilithium_test.h"
+//SABER tests
+#include "saber_test.h"
 
 #include <iostream>
 #include <sstream>
@@ -446,6 +448,10 @@ int scoped_main(int argc, char *argv[])
 		else if (command == "dilithium")
 		{
 			RunDilithiumTests();
+		}
+		//Testing SABER
+		else if (command == "saber") {
+			RunSaberTests();
 		}
 		else
 		{

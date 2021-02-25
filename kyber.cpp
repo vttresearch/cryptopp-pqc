@@ -116,7 +116,7 @@ int Kyber<T_K,T_Compr>::KemDec(unsigned char *ss, const unsigned char *ct, const
 
 
 // Generates public and private key for the CPA-secure
-//spublic-key encryption scheme underlying Kyber
+// public-key encryption scheme underlying Kyber
 template<int T_K, unsigned int T_Compr>
 void Kyber<T_K,T_Compr>::IndCpaKeypair(uint8_t *pk, uint8_t *sk) {
   unsigned int i;
