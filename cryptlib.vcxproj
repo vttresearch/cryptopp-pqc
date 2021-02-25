@@ -308,6 +308,9 @@
     <ClCompile Include="rng.cpp" />
     <ClCompile Include="rsa.cpp" />
     <ClCompile Include="rw.cpp" />
+    <ClCompile Include="saber.cpp" />
+    <ClCompile Include="saber_poly.cpp" />
+    <ClCompile Include="saber_utils.cpp" />
     <ClCompile Include="safer.cpp" />
     <ClCompile Include="salsa.cpp" />
     <ClCompile Include="scrypt.cpp" />
@@ -534,7 +537,8 @@
     <ClInclude Include="rng.h" />
     <ClInclude Include="rsa.h" />
     <ClInclude Include="rw.h" />
-    <ClInclude Include="safer.h" />
+    <ClInclude Include="saber.h" />
+    <ClInclude Include="safer.h" /> 
     <ClInclude Include="salsa.h" />
     <ClInclude Include="scrypt.h" />
     <ClInclude Include="seal.h" />

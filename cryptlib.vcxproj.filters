@@ -404,6 +404,15 @@
     <ClCompile Include="rw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="saber.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="saber_poly.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="saber_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="safer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -949,6 +958,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="rw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="saber.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="safer.h">

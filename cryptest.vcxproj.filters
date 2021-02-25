@@ -515,6 +515,9 @@
     <ClCompile Include="dilithium_test.cpp">
       <Filter>Source Code</Filter>
     </ClCompile>
+    <ClCompile Include="saber_test.cpp">
+      <Filter>Source Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bench.h">
@@ -527,6 +530,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="kyber_test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="saber_test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="validate.h">
