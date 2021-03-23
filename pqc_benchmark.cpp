@@ -87,23 +87,23 @@ void BenchmarkLightSaber() {
         
 
         //Generate public key pk and secret key sk
-        clockBefore = _rdtsc();
+        clockBefore = __rdtsc();
         saber.KemKeypair(pk, sk);
-        clockAfter = _rdtsc();
+        clockAfter = __rdtsc();
         clockKeyPair = clockKeyPair + (clockAfter - clockBefore);
 
         //Key encapsulation
-        clockBefore = _rdtsc();
+        clockBefore = __rdtsc();
         saber.KemEnc(ct, ssA, pk);
-        clockAfter = _rdtsc();
+        clockAfter = __rdtsc();
         clockKemEnc = clockKemEnc + (clockAfter - clockBefore);
 
 
         
         //Key decapsulation
-        clockBefore = _rdtsc();
+        clockBefore = __rdtsc();
         saber.KemDec(ssB, ct, sk);
-        clockAfter = _rdtsc();
+        clockAfter = __rdtsc();
         clockKemDec = clockKemDec + (clockAfter - clockBefore);
         if (memcmp(ssA, ssB, LightSaber::SHAREDSECRETBYTES)) {
             std::cout << "Error in LightSaber" << std::endl;
@@ -153,23 +153,23 @@ void BenchmarkSaber() {
         
 
         //Generate public key pk and secret key sk
-        clockBefore = _rdtsc();
+        clockBefore = __rdtsc();
         saber.KemKeypair(pk, sk);
-        clockAfter = _rdtsc();
+        clockAfter = __rdtsc();
         clockKeyPair = clockKeyPair + (clockAfter - clockBefore);
 
         //Key encapsulation
-        clockBefore = _rdtsc();
+        clockBefore = __rdtsc();
         saber.KemEnc(ct, ssA, pk);
-        clockAfter = _rdtsc();
+        clockAfter = __rdtsc();
         clockKemEnc = clockKemEnc + (clockAfter - clockBefore);
 
 
         
         //Key decapsulation
-        clockBefore = _rdtsc();
+        clockBefore = __rdtsc();
         saber.KemDec(ssB, ct, sk);
-        clockAfter = _rdtsc();
+        clockAfter = __rdtsc();
         clockKemDec = clockKemDec + (clockAfter - clockBefore);
         if (memcmp(ssA, ssB, Saber::SHAREDSECRETBYTES)) {
             std::cout << "Error in Saber" << std::endl;
@@ -219,23 +219,23 @@ void BenchmarkFireSaber() {
         
 
         //Generate public key pk and secret key sk
-        clockBefore = _rdtsc();
+        clockBefore = __rdtsc();
         saber.KemKeypair(pk, sk);
-        clockAfter = _rdtsc();
+        clockAfter = __rdtsc();
         clockKeyPair = clockKeyPair + (clockAfter - clockBefore);
 
         //Key encapsulation
-        clockBefore = _rdtsc();
+        clockBefore = __rdtsc();
         saber.KemEnc(ct, ssA, pk);
-        clockAfter = _rdtsc();
+        clockAfter = __rdtsc();
         clockKemEnc = clockKemEnc + (clockAfter - clockBefore);
 
 
         
         //Key decapsulation
-        clockBefore = _rdtsc();
+        clockBefore = __rdtsc();
         saber.KemDec(ssB, ct, sk);
-        clockAfter = _rdtsc();
+        clockAfter = __rdtsc();
         clockKemDec = clockKemDec + (clockAfter - clockBefore);
         if (memcmp(ssA, ssB, FireSaber::SHAREDSECRETBYTES)) {
             std::cout << "Error in FireSaber" << std::endl;
@@ -287,19 +287,19 @@ void BenchmarkDilithium1()
 
     dilithium.RandomBytes(m, MLEN);
     
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     dilithium.Keypair(pk, sk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockKeypair = clockKeypair + (clockAfter - clockBefore);
 
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     dilithium.Sign(sm, &smLen, m, MLEN, sk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockSign = clockSign + (clockAfter - clockBefore);
     
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     ret = dilithium.Open(m2, &mLen, sm, smLen, pk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockOpen = clockOpen + (clockAfter - clockBefore);
 
     if(ret) {
@@ -369,19 +369,19 @@ void BenchmarkDilithium2()
 
     dilithium.RandomBytes(m, MLEN);
     
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     dilithium.Keypair(pk, sk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockKeypair = clockKeypair + (clockAfter - clockBefore);
 
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     dilithium.Sign(sm, &smLen, m, MLEN, sk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockSign = clockSign + (clockAfter - clockBefore);
     
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     ret = dilithium.Open(m2, &mLen, sm, smLen, pk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockOpen = clockOpen + (clockAfter - clockBefore);
 
     if(ret) {
@@ -452,19 +452,19 @@ void BenchmarkDilithium3()
 
     dilithium.RandomBytes(m, MLEN);
     
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     dilithium.Keypair(pk, sk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockKeypair = clockKeypair + (clockAfter - clockBefore);
 
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     dilithium.Sign(sm, &smLen, m, MLEN, sk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockSign = clockSign + (clockAfter - clockBefore);
     
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     ret = dilithium.Open(m2, &mLen, sm, smLen, pk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockOpen = clockOpen + (clockAfter - clockBefore);
 
     if(ret) {
@@ -536,19 +536,19 @@ void BenchmarkDilithium4()
 
     dilithium.RandomBytes(m, MLEN);
     
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     dilithium.Keypair(pk, sk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockKeypair = clockKeypair + (clockAfter - clockBefore);
 
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     dilithium.Sign(sm, &smLen, m, MLEN, sk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockSign = clockSign + (clockAfter - clockBefore);
     
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     ret = dilithium.Open(m2, &mLen, sm, smLen, pk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockOpen = clockOpen + (clockAfter - clockBefore);
 
     if(ret) {
@@ -616,21 +616,21 @@ void BenchmarkKyber512()
   for(i=0;i<NTESTS;i++) {
     word64 clockBefore, clockAfter;
     //Alice generates a public key
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     kyber.KemKeypair(pk, sk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockKeypair = clockKeypair + (clockAfter - clockBefore);
 
     //Bob derives a secret key and creates a response
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     kyber.KemEnc(ct, key_b, pk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockKemEnc = clockKemEnc + (clockAfter - clockBefore);
 
     //Alice uses Bobs response to get her shared key
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     kyber.KemDec(key_a, ct, sk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockKemDec = clockKemDec + (clockAfter - clockBefore);
 
     if(memcmp(key_a, key_b, Kyber512::SHAREDSECRETBYTES)) {
@@ -679,21 +679,21 @@ void BenchmarkKyber768()
   for(i=0;i<NTESTS;i++) {
     word64 clockBefore, clockAfter;
     //Alice generates a public key
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     kyber.KemKeypair(pk, sk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockKeypair = clockKeypair + (clockAfter - clockBefore);
 
     //Bob derives a secret key and creates a response
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     kyber.KemEnc(ct, key_b, pk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockKemEnc = clockKemEnc + (clockAfter - clockBefore);
 
     //Alice uses Bobs response to get her shared key
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     kyber.KemDec(key_a, ct, sk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockKemDec = clockKemDec + (clockAfter - clockBefore);
 
     if(memcmp(key_a, key_b, Kyber768::SHAREDSECRETBYTES)) {
@@ -743,21 +743,21 @@ void BenchmarkKyber1024()
   for(i=0;i<NTESTS;i++) {
     word64 clockBefore, clockAfter;
     //Alice generates a public key
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     kyber.KemKeypair(pk, sk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockKeypair = clockKeypair + (clockAfter - clockBefore);
 
     //Bob derives a secret key and creates a response
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     kyber.KemEnc(ct, key_b, pk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockKemEnc = clockKemEnc + (clockAfter - clockBefore);
 
     //Alice uses Bobs response to get her shared key
-    clockBefore = _rdtsc();
+    clockBefore = __rdtsc();
     kyber.KemDec(key_a, ct, sk);
-    clockAfter = _rdtsc();
+    clockAfter = __rdtsc();
     clockKemDec = clockKemDec + (clockAfter - clockBefore);
 
     if(memcmp(key_a, key_b, Kyber1024::SHAREDSECRETBYTES)) {
