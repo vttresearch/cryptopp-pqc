@@ -1,0 +1,18 @@
+Benchmarking Kyber512...
+Number of tests: 10000
+Average keypair time: 77452
+Average KemEnc time: 103454
+Average KemDec time: 124722
+
+Benchmarking Kyber768...
+Number of tests: 10000
+Average keypair time: 137032
+Average KemEnc time: 170474
+Average KemDec time: 196737
+
+Benchmarking Kyber1024...
+Number of tests: 10000
+Average keypair time: 213370
+Average KemEnc time: 251775
+Average KemDec time: 283941
+

@@ -38,6 +38,9 @@
 //SABER tests
 #include "saber_test.h"
 
+//PQC benchmarking 
+#include "pqc_benchmark.h"
+
 #include <iostream>
 #include <sstream>
 #include <locale>
@@ -452,6 +455,21 @@ int scoped_main(int argc, char *argv[])
 		//Testing SABER
 		else if (command == "saber") {
 			RunSaberTests();
+		}
+		//PQC benchmarking
+		else if (command == "saberb") {
+			BenchmarkSaberVersions();
+		}
+		else if (command == "dilithiumb") {
+			BenchmarkDilithiumVersions();
+		}
+		else if (command == "kyberb") {
+			BenchmarkKyberVersions();
+		}
+		else if (command == "pqcbench") {
+			BenchmarkKyberVersions();
+			BenchmarkDilithiumVersions();
+			BenchmarkSaberVersions();
 		}
 		else
 		{

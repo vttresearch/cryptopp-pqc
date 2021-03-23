@@ -125,14 +125,14 @@ TEST_SRCS = \
     dlltest.cpp fipsalgt.cpp validat0.cpp validat1.cpp validat2.cpp \
     validat3.cpp validat4.cpp validat5.cpp validat6.cpp validat7.cpp \
     validat8.cpp validat9.cpp validat10.cpp regtest1.cpp regtest2.cpp \
-    regtest3.cpp regtest4.cpp kyber_test.cpp dilithium_test.cpp saber_test.cpp
+    regtest3.cpp regtest4.cpp kyber_test.cpp dilithium_test.cpp saber_test.cpp pqc_benchmark.cpp
 
 TEST_OBJS = \
     test.obj bench1.obj bench2.obj bench3.obj datatest.obj \
     dlltest.obj fipsalgt.obj validat0.obj validat1.obj validat2.obj \
     validat3.obj validat4.obj validat5.obj validat6.obj validat7.obj \
     validat8.obj validat9.obj validat10.obj regtest1.obj regtest2.obj \
-    regtest3.obj regtest4.obj kyber_test.obj dilithium_test.obj saber_test.obj
+    regtest3.obj regtest4.obj kyber_test.obj dilithium_test.obj saber_test.obj pqc_benchmark.obj
 
 CXX = cl.exe
 LD = link.exe
@@ -362,6 +362,8 @@ chacha_avx.obj:
 #dilithium_test.obj:
 #	$(CXX) $(CXXFLAGS) $(CXXFLAGS_IMPORTS) /c $?
 #saber_test.obj:
+#	$(CXX) $(CXXFLAGS) $(CXXFLAGS_IMPORTS) /c $?
+#pqc_benchmark.obj:
 #	$(CXX) $(CXXFLAGS) $(CXXFLAGS_IMPORTS) /c $?
 
 # For testing cryptopp.dll and CRYPTOPP_EXPORTS

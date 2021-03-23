@@ -212,6 +212,7 @@
     <ClCompile Include="dlltest.cpp" />
     <ClCompile Include="fipsalgt.cpp" />
     <ClCompile Include="kyber_test.cpp" />
+    <ClCompile Include="pqc_benchmark.cpp" />
     <ClCompile Include="regtest1.cpp" />
     <ClCompile Include="regtest2.cpp" />
     <ClCompile Include="regtest3.cpp" />
@@ -235,6 +236,7 @@
     <ClInclude Include="dilithium_test.h" />
     <ClInclude Include="factory.h" />
     <ClInclude Include="kyber_test.h" />
+    <ClInclude Include="pqc_benchmark.h" />
     <ClInclude Include="saber_test.h" />
     <ClInclude Include="validate.h" />
   </ItemGroup>
