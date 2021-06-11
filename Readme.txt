@@ -1,5 +1,4 @@
-This repository is a fork of Crypto++ version 8.3. 3 post-quantum cryptographic algorithms have been
-added into this fork - CRYSTALS-Kyber, CRYSTALS-Dilithium and SABER. 
+This repository is a fork of Crypto++ version 8.3. 3 post-quantum cryptographic algorithms from the NIST post-quantum standardization process have been added into this fork - CRYSTALS-Kyber, CRYSTALS-Dilithium and SABER. 
 
 They are based on the reference implementations:
   
@@ -8,7 +7,7 @@ They are based on the reference implementations:
   Dilithium by the CRYSTALS team (https://github.com/pq-crystals/dilithium)
 
   SABER by the SABER team (https://github.com/KULeuven-COSIC/SABER)
-
+The reference implementations and algorithm specifications can be found e.g. on the NIST post-quantum cryptography project page (https://csrc.nist.gov/Projects/post-quantum-cryptography/round-3-submissions).  
 
 New files:
 
@@ -24,13 +23,12 @@ Benchmark   pqc_benchmark.h, pqc_benchmark.cpp
 
 Edited files:
 
-            TestData/usage.dat, Filelist.txt, cryptest.nmake, cryptest.vcxproj, cryptest.vcxproj.filters, cryptlib.vcxproj,
-            cryptlib.vcxproj.filters, test.cpp
+            TestData/usage.dat, Filelist.txt, cryptest.nmake, cryptest.vcxproj, cryptest.vcxproj.filters, 
+            cryptlib.vcxproj, cryptlib.vcxproj.filters, test.cpp, Readme.txt
 
 How to use the post-quantum algorithms:
 
-The files "pqc_benchmark.h" and "pqc_benchmark.cpp" show how the algorithms should be used. Also, the test files can be used as a usage 
-example as well.
+The files "pqc_benchmark.h" and "pqc_benchmark.cpp" show how the algorithms should be used. Also, the individual test files of the algorithms can be used as a usage example as well. Below are also examples how to use the algorithms.
 
 Kyber-768 usage example:
 ----------------------------------------------------------------------------------
@@ -119,9 +117,9 @@ Saber usage example:
 ----------------------------------------------------------------------------------
 
 
-IMPORTANT: the Dilithium version implemented in this repository is not the most current one. The most current 
-implementations of the algorithms can be found in their respective repositories.
-
+IMPORTANT TO NOTICE: 
+The Dilithium version implemented in this repository is not the most current one. The algorithms are still being developed during the standardization process, so changes are possible. The most current implementations of the algorithms can be found in their respective repositories.
+Do not use these implementations in production, the PQC algorithms in this repository are meant for testing and research only. 
 
 
 Original Readme of the forked library version
