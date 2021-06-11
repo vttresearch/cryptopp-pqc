@@ -1,6 +1,6 @@
 This repository is a fork of Crypto++ version 8.3. 3 post-quantum cryptographic algorithms from the NIST post-quantum standardization process have been added into this fork - CRYSTALS-Kyber, CRYSTALS-Dilithium and SABER. 
 
-They are based on the reference implementations:
+They are based on the public-domain reference implementations:
   
   Kyber by the CRYSTALS team (https://github.com/pq-crystals/kyber)
 
@@ -120,6 +120,16 @@ Saber usage example:
 IMPORTANT TO NOTICE: 
 The Dilithium version implemented in this repository is not the most current one. The algorithms are still being developed during the standardization process, so changes are possible. The most current implementations of the algorithms can be found in their respective repositories.
 Do not use these implementations in production, the PQC algorithms in this repository are meant for testing and research only. 
+
+
+Building and running tests on Linux:
+Run "make" in the main directory. 
+Run "./cryptest.exe k" to run Kyber tests.
+Run "./cryptest.exe dilithium" to run Dilithium tests
+Run "./cryptest.exe saber" to run SABER tests
+Run "./cryptest.exe pqcbench" to benchmark all three PQC algorithms. Run "./cryptest.exe kyberb" to benchmark only Kyber. Run "./cryptest.exe dilithiumb" to benchmark only Dilithium. Run "./cryptest.exe saberb" to benchmark only SABER. 
+
+Building tests on Windows can be done with Visual Studio, the Visual Studio project files have been edited to include the post-quantum algorithms.
 
 
 Original Readme of the forked library version
