@@ -1,3 +1,132 @@
+This repository is a fork of Crypto++ version 8.3. 3 post-quantum cryptographic algorithms have been
+added into this fork - CRYSTALS-Kyber, CRYSTALS-Dilithium and SABER. 
+
+They are based on the reference implementations:
+  
+  Kyber by the CRYSTALS team (https://github.com/pq-crystals/kyber)
+
+  Dilithium by the CRYSTALS team (https://github.com/pq-crystals/dilithium)
+
+  SABER by the SABER team (https://github.com/KULeuven-COSIC/SABER)
+
+
+New files:
+
+Kyber       kyber.h, kyber.cpp, kyber_poly.cpp, kyber_ntt.cpp, kyber_poly.cpp, kyber_test.h,
+            kyber_test.cpp, kyber_utils.cpp, benchmark_kyber.txt   
+
+Dilithium   dilithium.h, dilithium.cpp, dilithium_poly.cpp, dilithium_ntt.cpp, dilithium_poly.cpp, dilithium_test.h,
+            dilithium_test.cpp, dilithium_utils.cpp, benchmark_dilithium.txt     
+
+SABER       saber.h, saber.cpp, saber_poly.cpp, saber_test.h, saber_test.cpp, saber_utils.cpp, benchmark_saber.txt
+
+Benchmark   pqc_benchmark.h, pqc_benchmark.cpp
+
+Edited files:
+
+            TestData/usage.dat, Filelist.txt, cryptest.nmake, cryptest.vcxproj, cryptest.vcxproj.filters, cryptlib.vcxproj,
+            cryptlib.vcxproj.filters, test.cpp
+
+How to use the post-quantum algorithms:
+
+The files "pqc_benchmark.h" and "pqc_benchmark.cpp" show how the algorithms should be used. Also, the test files can be used as a usage 
+example as well.
+
+Kyber-768 usage example:
+----------------------------------------------------------------------------------
+    #include "kyber.h"
+
+    //public key
+    unsigned char pk[Kyber768::PUBLICKEYBYTES];
+    //private key
+    unsigned char sk[Kyber768::SECRETKEYBYTES];
+    //ciphertext
+    unsigned char ct[Kyber768::CIPHERTEXTBYTES];
+    //result A
+    unsigned char key_a[Kyber768::SHAREDSECRETBYTES];
+    //result B
+    unsigned char key_b[Kyber768::SHAREDSECRETBYTES];
+
+    Kyber768 kyber = Kyber768();
+
+    //Create key pair
+    kyber.KemKeypair(pk, sk);
+
+    //Encapsulation
+    kyber.KemEnc(ct, key_b, pk);
+
+    //Decapsulation
+    kyber.KemDec(key_a, ct, sk);
+----------------------------------------------------------------------------------
+
+
+Dilithium usage example:
+----------------------------------------------------------------------------------
+    #include "dilithium.h"
+
+    size_t mLen, smLen;
+
+    //Message (MLEN = Length of the message)
+    byte m[MLEN];
+    //Signed message
+    byte sm[MLEN + Dilithium3::BYTES];
+    //Output message from signature verification
+    byte m2[MLEN + Dilithium3::BYTES];
+    //public key
+    byte pk[Dilithium3::PUBLICKEYBYTES];
+    //private key
+    byte sk[Dilithium3::SECRETKEYBYTES];
+
+    Dilithium3 dilithium = Dilithium3();
+
+    //Create keypair
+    dilithium.Keypair(pk, sk);
+
+    //Create a random message m to be Signed
+    dilithium.RandomBytes(m, MLEN);
+
+    //Sign message m with length MLEN
+    dilithium.Sign(sm, &smLen, m, MLEN, sk);
+
+    //Verify signed message sm (ret=0 if verification succesful, -1 otherwise)
+    ret = dilithium.Open(m2, &mLen, sm, smLen, pk);
+----------------------------------------------------------------------------------
+
+
+Saber usage example:
+----------------------------------------------------------------------------------
+    #include "saber.h"
+
+    //public key
+    byte pk[Saber::PUBLICKEYBYTES];
+    //private key
+    byte sk[Saber::SECRETKEYBYTES];
+    //ciphertext
+    byte ct[Saber::CIPHERTEXTBYTES];	
+    //Results A and B
+    byte key_a[Saber::SHAREDSECRETBYTES], key_b[Saber::SHAREDSECRETBYTES];
+
+    Saber saber = Saber();
+
+    //Create keypair
+    saber.KemKeypair(pk, sk);
+
+    //Encapsulation
+    saber.KemEnc(ct, key_a, pk);
+
+    //Decapsulation
+    saber.KemDec(ssB, ct, sk);
+----------------------------------------------------------------------------------
+
+
+IMPORTANT: the Dilithium version implemented in this repository is not the most current one. The most current 
+implementations of the algorithms can be found in their respective repositories.
+
+
+
+Original Readme of the forked library version
+------------------------------------------------------------------------------------------------
+
 Crypto++: free C++ Class Library of Cryptographic Schemes
 Version 8.3 - TBD
 
