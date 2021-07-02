@@ -443,7 +443,7 @@ int scoped_main(int argc, char *argv[])
 			std::cout << CRYPTOPP_VERSION / 100 << '.' << (CRYPTOPP_VERSION % 100) / 10 << '.' << CRYPTOPP_VERSION % 10 << std::endl;
 		}
 		//Testing kyber
-		else if (command == "k") 
+		else if (command == "kyber") 
 		{
 			RunKyberTests();
 		} 

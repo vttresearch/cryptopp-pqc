@@ -81,7 +81,24 @@ Test Driver for Crypto++(R) Library, a C++ Class Library of Cryptographic Scheme
 	cryptest b [time allocated for each benchmark in seconds] [frequency of CPU in gigahertz]
 
 - To run Kyber tests
-	cryptest k
+	cryptest kyber
 
 - To run Dilithium tests
 	cryptest dilithium
+
+- To run SABER tests
+	cryptest saber
+
+- To benchmark Kyber
+	cryptest kyberb
+
+- To benchmark Dilithium
+	cryptest dilithiumb
+
+- To benchmark SABER
+	cryptest saberb
+
+- To benchmark all PQC algorithms
+	cryptest pqcbench
+	
+
