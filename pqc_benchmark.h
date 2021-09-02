@@ -31,6 +31,7 @@ void BenchmarkKyber512();
 void BenchmarkKyber768();
 void BenchmarkKyber1024();
 
+void BenchSaberMul();
 
 
 

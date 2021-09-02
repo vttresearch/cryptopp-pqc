@@ -1,18 +1,18 @@
 Benchmarking LightSaber...
 Number of tests: 10000
-Average keypair time: 84330
-Average KemEnc time: 106420
-Average KemDec time: 121883
+Average keypair time: 46551
+Average KemEnc time: 51789
+Average KemDec time: 55970
 
 Benchmarking Saber...
 Number of tests: 10000
-Average keypair time: 158330
-Average KemEnc time: 193770
-Average KemDec time: 218243
+Average keypair time: 80856
+Average KemEnc time: 91811
+Average KemDec time: 97211
 
 Benchmarking FireSaber...
 Number of tests: 10000
-Average keypair time: 257348
-Average KemEnc time: 305424
-Average KemDec time: 340069
+Average keypair time: 127774
+Average KemEnc time: 143594
+Average KemDec time: 153203
 

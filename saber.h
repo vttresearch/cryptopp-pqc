@@ -26,6 +26,12 @@ public:
     //Key decapsulation
     int KemDec(byte *ss, const byte *ct, const byte *sk);
 
+    //For benchmarking the polynomial multiplications 
+    void BenchMatrixVectorMul() {
+        BenchMatrixVectorMulPerformance();
+    }
+
+
 
 private:
     //SABER parameters
@@ -78,6 +84,8 @@ private:
     void ToomCook4Way (const word16 *a1, const word16 *b1, word16 *result);
 
     void Cbd(word16 *s, const byte *buf);
+
+    void BenchMatrixVectorMulPerformance();
 
 
     //Packing utils

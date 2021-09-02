@@ -780,8 +780,38 @@ void BenchmarkKyber1024()
   }
 }
 
+/** Benchmarking of the polynomial multiplications of SABER **/
+void BenchSaberMul() {
+  std::ofstream saberStream("benchmark_saber_mul.txt");
+    if (saberStream.is_open()) {
+      saberStream << "Benchmarking Saber polynomial multiplications...\n";
+      saberStream.close();
+    }
+    
+    word64 clockMatrixVectorMul;
+    Saber saber = Saber();
+    clockMatrixVectorMul = 0;
 
+    for (int i=0; i < NTESTS; i++) {
+        word64 clockBefore;
+        word64 clockAfter;
 
+        clockBefore = __rdtsc();
+        saber.BenchMatrixVectorMul();
+        clockAfter = __rdtsc();
+        clockMatrixVectorMul = clockMatrixVectorMul + (clockAfter - clockBefore);
+
+    }
+    saberStream.open("benchmark_saber_mul.txt", std::ios::app);
+    if (saberStream.is_open()) {
+      saberStream << "Number of tests: ";
+      saberStream << NTESTS << "\n";
+      saberStream << "Average BenchMatrixVectorMul time: ";
+      saberStream << clockMatrixVectorMul / NTESTS << "\n";
+      saberStream << "\n";
+      saberStream.close();
+    }
+}
 
 
 

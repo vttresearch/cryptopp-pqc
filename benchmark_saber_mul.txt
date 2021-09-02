@@ -1,0 +1,4 @@
+Benchmarking Saber polynomial multiplications...
+Number of tests: 10000
+Average BenchMatrixVectorMul time: 71099
+

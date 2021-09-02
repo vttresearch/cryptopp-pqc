@@ -142,7 +142,7 @@ void SABER<T_L, T_Et>::IndCpaKemKeypair(byte *pk, byte *sk)
 	byte seedA[SEEDBYTES];
     byte seedS[NOISE_SEEDBYTES];
 	int i, j;
-
+	
 	RandomBytes(seedA, SEEDBYTES);
     SHAKE128 shake128 = SHAKE128(SEEDBYTES);
 
@@ -234,6 +234,33 @@ void SABER<T_L, T_Et>::IndCpaKemDec(const byte *sk, const byte *cipherText, byte
 
 	POLmsg2BS(m, v);
 }
+
+/**
+ * For benchmarking purposes
+ */
+template<byte T_L, byte T_Et>
+void SABER<T_L, T_Et>::BenchMatrixVectorMulPerformance() {
+	word16 A[L][L][N];
+	word16 s[L][N];
+	word16 b[L][N] = {0};
+
+	byte seedA[SEEDBYTES];
+    byte seedS[NOISE_SEEDBYTES];
+	int i, j;
+	
+	RandomBytes(seedA, SEEDBYTES);
+    SHAKE128 shake128 = SHAKE128(SEEDBYTES);
+
+    shake128.Update(seedA, SEEDBYTES);
+	shake128.Final(seedA); // for not revealing system RNG state
+	RandomBytes(seedS, NOISE_SEEDBYTES);
+
+	GenMatrix(A, seedA);
+	GenSecret(s, seedS);
+	MatrixVectorMul(A, s, b, 1);
+
+}
+
 
 
 template class SABER<2,3>;

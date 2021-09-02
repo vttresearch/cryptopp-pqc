@@ -471,6 +471,9 @@ int scoped_main(int argc, char *argv[])
 			BenchmarkDilithiumVersions();
 			BenchmarkSaberVersions();
 		}
+		else if (command == "sabermul") {
+			BenchSaberMul();
+		}
 		else
 		{
 			std::cerr << "Unrecognized command. Run \"cryptest h\" to obtain usage information.\n";

@@ -169,7 +169,7 @@ ifeq ($(CXXFLAGS),)
     CRYPTOPP_CXXFLAGS += -DNDEBUG -g -xO3
     ZOPT = -xO0
   else
-    CRYPTOPP_CXXFLAGS += -DNDEBUG -g2 -O3
+    CRYPTOPP_CXXFLAGS += -DNDEBUG -g2 -O3 -march=native
     ZOPT = -O0
   endif
 endif
