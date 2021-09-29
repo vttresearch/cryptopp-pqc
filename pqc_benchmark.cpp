@@ -32,10 +32,9 @@ NAMESPACE_BEGIN(Test)
 void BenchmarkDilithiumVersions() {
   std::cout << "Benchmarking Dilithium.\n";
   std::cout << "Results will be saved in benchmark_dilithium.txt" << std::endl;
-  BenchmarkDilithium1();
   BenchmarkDilithium2();
   BenchmarkDilithium3();
-  BenchmarkDilithium4();
+  BenchmarkDilithium5();
 }
 
 /**
@@ -261,91 +260,10 @@ void BenchmarkFireSaber() {
 
 #define MLEN 59
 
-void BenchmarkDilithium1()
-{
-  std::ofstream dilithiumStream("benchmark_dilithium.txt");
-  if (dilithiumStream.is_open()) {
-      dilithiumStream << "Benchmarking Dilithium1\n";
-      dilithiumStream.close();
-  }
-  word32 i, j;
-  int ret;
-  size_t mLen, smLen;
-  byte m[MLEN];
-  byte sm[MLEN + Dilithium1::BYTES];
-  byte m2[MLEN + Dilithium1::BYTES];
-  byte pk[Dilithium1::PUBLICKEYBYTES];
-  byte sk[Dilithium1::SECRETKEYBYTES];
-  word64 clockKeypair, clockSign, clockOpen;
-  clockKeypair = 0;
-  clockSign = 0;
-  clockOpen = 0;
-
-  Dilithium1 dilithium = Dilithium1();
-  for(i = 0; i < NTESTS; ++i) {
-    word64 clockBefore, clockAfter;
-
-    dilithium.RandomBytes(m, MLEN);
-    
-    clockBefore = __rdtsc();
-    dilithium.Keypair(pk, sk);
-    clockAfter = __rdtsc();
-    clockKeypair = clockKeypair + (clockAfter - clockBefore);
-
-    clockBefore = __rdtsc();
-    dilithium.Sign(sm, &smLen, m, MLEN, sk);
-    clockAfter = __rdtsc();
-    clockSign = clockSign + (clockAfter - clockBefore);
-    
-    clockBefore = __rdtsc();
-    ret = dilithium.Open(m2, &mLen, sm, smLen, pk);
-    clockAfter = __rdtsc();
-    clockOpen = clockOpen + (clockAfter - clockBefore);
-
-    if(ret) {
-      std::cout << "Dilithium1: Vefication failed" << std::endl;
-    }
-
-    if(mLen != MLEN) {
-      std::cout << "Dilithium1: Message lengths don't match" << std::endl;
-    }
-
-    for(j = 0; j < mLen; ++j) {
-      if(m[j] != m2[j]) {
-        std::cout << "Dilithium1: Messages don't match" << std::endl;
-      }
-    }
-
-    dilithium.RandomBytes((byte *)&j, sizeof(j));
-    do {
-      dilithium.RandomBytes(m2, 1);
-    } while(!m2[0]);
-    sm[j % Dilithium1::BYTES] += m2[0];
-    ret = dilithium.Open(m2, &mLen, sm, smLen, pk);
-    if(!ret) {
-      std::cout << "Dilithium1: Trivial forgeries possible" << std::endl;
-    }
-  }
-  dilithiumStream.open("benchmark_dilithium.txt", std::ios::app);
-  if (dilithiumStream.is_open()) {
-    dilithiumStream << "Number of tests: ";
-    dilithiumStream << NTESTS << "\n";
-    dilithiumStream << "Average keypair time: ";
-    dilithiumStream << clockKeypair / NTESTS << "\n";
-    dilithiumStream << "Average sign time: ";
-    dilithiumStream << clockSign / NTESTS << "\n";
-    dilithiumStream << "Average open time: ";
-    dilithiumStream << clockOpen / NTESTS << "\n";
-    dilithiumStream << "\n";   
-    dilithiumStream.close();
-  }
-  
-  
-}
 
 void BenchmarkDilithium2()
 {
-  std::ofstream dilithiumStream("benchmark_dilithium.txt", std::ios::app);
+  std::ofstream dilithiumStream("benchmark_dilithium.txt");
   if (dilithiumStream.is_open()) {
     dilithiumStream << "Benchmarking Dilithium2\n";
     dilithiumStream.close();
@@ -509,11 +427,11 @@ void BenchmarkDilithium3()
   
 }
 
-void BenchmarkDilithium4()
+void BenchmarkDilithium5()
 {
   std::ofstream dilithiumStream("benchmark_dilithium.txt", std::ios::app);
   if (dilithiumStream.is_open()) {
-    dilithiumStream << "Benchmarking Dilithium4\n";
+    dilithiumStream << "Benchmarking Dilithium5\n";
     dilithiumStream.close();
   }
   
@@ -521,16 +439,16 @@ void BenchmarkDilithium4()
   int ret;
   size_t mLen, smLen;
   byte m[MLEN];
-  byte sm[MLEN + Dilithium4::BYTES];
-  byte m2[MLEN + Dilithium4::BYTES];
-  byte pk[Dilithium4::PUBLICKEYBYTES];
-  byte sk[Dilithium4::SECRETKEYBYTES];
+  byte sm[MLEN + Dilithium5::BYTES];
+  byte m2[MLEN + Dilithium5::BYTES];
+  byte pk[Dilithium5::PUBLICKEYBYTES];
+  byte sk[Dilithium5::SECRETKEYBYTES];
   word64 clockKeypair, clockSign, clockOpen;
   clockKeypair = 0;
   clockSign = 0;
   clockOpen = 0;
 
-  Dilithium4 dilithium = Dilithium4();
+  Dilithium5 dilithium = Dilithium5();
   for(i = 0; i < NTESTS; ++i) {
     word64 clockBefore, clockAfter;
 
@@ -552,16 +470,16 @@ void BenchmarkDilithium4()
     clockOpen = clockOpen + (clockAfter - clockBefore);
 
     if(ret) {
-      std::cout << "Dilithium4: Vefication failed" << std::endl;
+      std::cout << "Dilithium5: Vefication failed" << std::endl;
     }
 
     if(mLen != MLEN) {
-      std::cout << "Dilithium4: Message lengths don't match" << std::endl;
+      std::cout << "Dilithium5: Message lengths don't match" << std::endl;
     }
 
     for(j = 0; j < mLen; ++j) {
       if(m[j] != m2[j]) {
-        std::cout << "Dilithium4: Messages don't match" << std::endl;
+        std::cout << "Dilithium5: Messages don't match" << std::endl;
       }
     }
 
@@ -569,10 +487,10 @@ void BenchmarkDilithium4()
     do {
       dilithium.RandomBytes(m2, 1);
     } while(!m2[0]);
-    sm[j % Dilithium4::BYTES] += m2[0];
+    sm[j % Dilithium5::BYTES] += m2[0];
     ret = dilithium.Open(m2, &mLen, sm, smLen, pk);
     if(!ret) {
-      std::cout << "Dilithium4: Trivial forgeries possible" << std::endl;
+      std::cout << "Dilithium5: Trivial forgeries possible" << std::endl;
     }
   }
   dilithiumStream.open("benchmark_dilithium.txt", std::ios::app);

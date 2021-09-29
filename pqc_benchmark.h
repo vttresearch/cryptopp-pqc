@@ -22,10 +22,10 @@ void BenchmarkLightSaber();
 void BenchmarkSaber();
 void BenchmarkFireSaber();
 
-void BenchmarkDilithium1();
+
 void BenchmarkDilithium2();
 void BenchmarkDilithium3();
-void BenchmarkDilithium4();
+void BenchmarkDilithium5();
 
 void BenchmarkKyber512();
 void BenchmarkKyber768();

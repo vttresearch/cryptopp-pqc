@@ -24,103 +24,138 @@ void Dilithium::RandomBytes(byte *out, size_t outLen) {
   AutoSeededRandomPool rng;
   rng.GenerateBlock(out, outLen);
 }
+/*static uint32_t seed[32] = {
+  3,1,4,1,5,9,2,6,5,3,5,8,9,7,9,3,2,3,8,4,6,2,6,4,3,3,8,3,2,7,9,5
+};
+static uint32_t in[12];
+static uint32_t out[8];
+static int outleft = 0;
+
+#define ROTATE(x,b) (((x) << (b)) | ((x) >> (32 - (b))))
+#define MUSH(i,b) x = t[i] += (((x ^ seed[i]) + sum) ^ ROTATE(x,b));
+
+static void surf(void)
+{
+  uint32_t t[12]; uint32_t x; uint32_t sum = 0;
+  int r; int i; int loop;
+
+  for (i = 0;i < 12;++i) t[i] = in[i] ^ seed[12 + i];
+  for (i = 0;i < 8;++i) out[i] = seed[24 + i];
+  x = t[11];
+  for (loop = 0;loop < 2;++loop) {
+    for (r = 0;r < 16;++r) {
+      sum += 0x9e3779b9;
+      MUSH(0,5) MUSH(1,7) MUSH(2,9) MUSH(3,13)
+      MUSH(4,5) MUSH(5,7) MUSH(6,9) MUSH(7,13)
+      MUSH(8,5) MUSH(9,7) MUSH(10,9) MUSH(11,13)
+    }
+    for (i = 0;i < 8;++i) out[i] ^= t[i + 4];
+  }
+}
+
+
+void Dilithium::RandomBytes(byte *x,size_t xlen)
+{
+  while (xlen > 0) {
+    if (!outleft) {
+      if (!++in[0]) if (!++in[1]) if (!++in[2]) ++in[3];
+      surf();
+      outleft = 8;
+    }
+    *x = out[--outleft];
+    //printf("%02x", *x);
+    ++x;
+    --xlen;
+  }
+ // printf("\n");
+}*/
 
 
 /* For finite field element a, compute a0, a1 such that
-*  a mod Q = a1*2^D + a0 with -2^{D-1} < a0 <= 2^{D-1}.
+*  a mod^+ Q = a1*2^mD + a0 with -2^{mD-1} < a0 <= 2^{mD-1}.
 *  Assumes a to be standard representative.
-*  Arguments:  - word32 a: input element
-*              - word32 *a0: pointer to output element Q + a0
+*  Arguments:  - sword32 a: input element
+*              - sword32 *a0: pointer to output element a0
 *
 * Returns a1.
 */
-word32 Dilithium::Power2Round(word32 a, word32 *a0)  {
-  sword32 t;
+sword32 Dilithium::Power2Round(sword32 *a0, sword32 a)  {
+  sword32 a1;
 
-  /* Centralized remainder mod 2^D */
-  t = a & ((1U << mD) - 1);
-  t -= (1U << (mD-1)) + 1;
-  t += (t >> 31) & (1U << mD);
-  t -= (1U << (mD-1)) - 1;
-  *a0 = mQ + t;
-  a = (a - t) >> mD;
-  return a;
+  a1 = (a + (1 << (mD-1)) - 1) >> mD;
+  *a0 = a - (a1 << mD);
+  return a1;
 }
 
 /*  For finite field element a, compute high and low bits a0, a1 such
-*   that a mod Q = a1*ALPHA + a0 with -ALPHA/2 < a0 <= ALPHA/2 except
-*   if a1 = (Q-1)/ALPHA where we set a1 = 0 and
-*   -ALPHA/2 <= a0 = a mod Q - Q < 0. Assumes a to be standard
+*   that a mod^+ mQ = a1*mAlpha + a0 with -mAlpha/2 < a0 <= mAlpha/2 except
+*   if a1 = (mQ-1)/mAlpha where we set a1 = 0 and
+*   -ALPHA/2 <= a0 = a^+ mod Q - Q < 0. Assumes a to be standard
 *   representative.
-*   Arguments: - word32 a: input element
-*              - word32 *a0: pointer to output element Q + a0
+*   Arguments: - sword32 a: input element
+*              - sword32 *a0: pointer to output element a0
 *
 * Returns a1.
 */
-word32 Dilithium::Decompose(word32 a, word32 *a0) {
-  sword32 t, u;
+sword32 Dilithium::Decompose(sword32 *a0, sword32 a) {
+  sword32 a1;
 
-  /* Centralized remainder mod ALPHA */
-  t = a & 0x7FFFF;
-  t += (a >> 19) << 9;
-  t -= mAlpha/2 + 1;
-  t += (t >> 31) & mAlpha;
-  t -= mAlpha/2 - 1;
-  a -= t;
+  a1  = (a + 127) >> 7;
+  if (mGamma2 == (mQ-1)/32) {
+    a1  = (a1*1025 + (1 << 21)) >> 22;
+    a1 &= 15;
+  }
+  
+  else if (mGamma2 == (mQ-1)/88) {
+    a1  = (a1*11275 + (1 << 23)) >> 24;
+    a1 ^= ((43 - a1) >> 31) & a1;
+  }
 
-  /* Divide by ALPHA (possible to avoid) */
-  u = a - 1;
-  u >>= 31;
-  a = (a >> 19) + 1;
-  a -= u & 1;
-
-  /* Border case */
-  *a0 = mQ + t - (a >> 4);
-  a &= 0xF;
-  return a;
+  *a0  = a - a1*2*mGamma2;
+  *a0 -= (((mQ-1)/2 - *a0) >> 31) & mQ;
+  return a1;
 }
 
 /* Compute hint bit indicating whether the low bits of the
-*  input element overflow into the high bits. Inputs assumed to be
-*  standard representatives.
-*  Arguments:   - word32 a0: low bits of input element
-*               - word32 a1: high bits of input element
+*  input element overflow into the high bits. 
+*  Arguments:   - sword32 a0: low bits of input element
+*               - sword32 a1: high bits of input element
 *
-* Returns 1 if high bits of a and b differ and 0 otherwise.
+* Returns 1 if overflow.
 */
-word32 Dilithium::MakeHint(word32 a0, word32 a1) {
-  if(a0 <= mGamma2 || a0 > mQ - mGamma2 || (a0 == mQ - mGamma2 && a1 == 0))
-    return 0;
+word32 Dilithium::MakeHint(sword32 a0, sword32 a1) {
+  if(a0 > mGamma2 || a0 < - mGamma2 || (a0 == - mGamma2 && a1 != 0))
+    return 1;
 
-  return 1;
+  return 0;
 }
 
 /* Correct high bits according to hint.
-* Arguments:   - word32 a: input element
+* Arguments:   - sword32 a: input element
 *              - word32 hint: hint bit
 *
 * Returns corrected high bits.
 */
-word32 Dilithium::UseHint(word32 a, word32 hint) {
-  word32 a0, a1;
+sword32 Dilithium::UseHint(sword32 a, word32 hint) {
+  sword32 a0, a1;
 
-  a1 = Decompose(a, &a0);
+  a1 = Decompose(&a0, a);
   if(hint == 0)
     return a1;
-  else if(a0 > mQ)
-    return (a1 + 1) & 0xF;
-  else
-    return (a1 - 1) & 0xF;
 
-  //Note: This was commented out in the reference implementation
-  /* If decompose does not divide out ALPHA:
-  if(hint == 0)
-    return a1;
-  else if(a0 > Q)
-    return (a1 + ALPHA) % (Q - 1);
-  else
-    return (a1 - ALPHA) % (Q - 1);
-  */
+  if (mGamma2 == (mQ-1)/32) {
+    if(a0 > 0)
+      return (a1 + 1) & 15;
+    else
+      return (a1 - 1) & 15;
+  }
+  
+  else if (mGamma2 == (mQ-1)/88) {
+    if(a0 > 0)
+      return (a1 == 43) ?  0 : a1 + 1;
+    else
+      return (a1 ==  0) ? 43 : a1 - 1;
+  }
 }
 
 /*
@@ -160,18 +195,18 @@ void Dilithium::UnpackPk(byte *rho, polyvec *t1, const byte *pk)
 }
 
 /*
-* Bit-pack secret key sk = (rho, key, tr, s1, s2, t0).
+* Bit-pack secret key sk = (rho, tr, key, t0, s1, s2).
 *
 * Arguments:   - byte *sk: pointer to output byte array
 *              - const byte *rho: pointer to byte array containing rho
-*              - const byte *key: pointer to byte array containing key
 *              - const byte *tr: byte array containing tr
+*              - const byte *key: pointer to byte array containing key
+*              - const polyvec *t0: pointer to vector t0
 *              - const polyvec *s1: pointer to vector s1
 *              - const polyvec *s2: pointer to vector s2
-*              - const polyvec *t0: pointer to vector t0
 */
-void Dilithium::PackSk(byte *sk, const byte *rho, const byte *key, const byte *tr, const polyvec *s1,
-             const polyvec *s2, const polyvec *t0)
+void Dilithium::PackSk(byte *sk, const byte *rho, const byte *tr, const byte *key, const polyvec *t0,
+             const polyvec *s1, const polyvec *s2)
 {
   word32 i;
 
@@ -183,9 +218,9 @@ void Dilithium::PackSk(byte *sk, const byte *rho, const byte *key, const byte *t
     sk[i] = key[i];
   sk += mSeedBytes;
 
-  for(i = 0; i < mCrhBytes; ++i)
+  for(i = 0; i < mSeedBytes; ++i)
     sk[i] = tr[i];
-  sk += mCrhBytes;
+  sk += mSeedBytes;
 
   for(i = 0; i < mL; ++i)
     PolyEtaPack(sk + i*mPolyEtaPackedBytes, &s1->at(i));
@@ -199,17 +234,17 @@ void Dilithium::PackSk(byte *sk, const byte *rho, const byte *key, const byte *t
     Polyt0Pack(sk + i*mPolyt0PackedBytes, &t0->at(i));
 }
 
-/* Unpack secret key sk = (rho, key, tr, s1, s2, t0).
+/* Unpack secret key sk = (rho, tr, key, t0, s1, s2).
 * Arguments:   - const byte *rho: pointer to output byte array for rho
-*              - const byte *key: pointer to output byte array for key
 *              - const byte *tr: pointer to output byte array for tr
+*              - const byte *key: pointer to output byte array for key
+*              - const polyvec *t0: pointer to output vector t0
 *              - const polyvec *s1: pointer to output vector s1
 *              - const polyvec *s2: pointer to output vector s2
-*              - const polyvec *r0: pointer to output vector t0
 *              - byte *sk: byte array containing bit-packed sk
 */
-void Dilithium::UnpackSk(byte *rho, byte *key, byte *tr, 
-                          polyvec *s1, polyvec *s2, polyvec *t0, const byte *sk)
+void Dilithium::UnpackSk(byte *rho, byte *tr, byte *key, polyvec *t0,  
+                          polyvec *s1, polyvec *s2, const byte *sk)
 {
   word32 i;
 
@@ -221,9 +256,9 @@ void Dilithium::UnpackSk(byte *rho, byte *key, byte *tr,
     key[i] = sk[i];
   sk += mSeedBytes;
 
-  for(i = 0; i < mCrhBytes; ++i)
+  for(i = 0; i < mSeedBytes; ++i)
     tr[i] = sk[i];
-  sk += mCrhBytes;
+  sk += mSeedBytes;
   
   for(i=0; i < mL; ++i)
     PolyEtaUnpack(&s1->at(i), sk + i*mPolyEtaPackedBytes);
@@ -237,22 +272,29 @@ void Dilithium::UnpackSk(byte *rho, byte *key, byte *tr,
     Polyt0Unpack(&t0->at(i), sk + i*mPolyt0PackedBytes);
 }
 
-/* Bit-pack signature sig = (z, h, c).
+/* Bit-pack signature sig = (c, z, h).
 * Arguments:   - byte *sig: pointer to output byte array
+*              - const byte *c: pointer to challenge hash 
 *              - const polyvec *z: pointer to vector z
 *              - const polyvec *h: pointer to hint vector h
-*              - const poly *c: pointer to challenge polynomial
+
 */
-void Dilithium::PackSig(byte *sig, const polyvec *z, const polyvec *h, const poly *c)
+void Dilithium::PackSig(byte *sig, const byte *c, const polyvec *z, const polyvec *h)
 {
   word32 i, j, k;
-  word64 signs, mask;
+
+  for(i=0; i < mSeedBytes; ++i)
+    sig[i] = c[i];
+  sig += mSeedBytes;
 
   for(i = 0; i < mL; ++i)
     PolyzPack(sig + i*mPolyzPackedBytes, &z->at(i));
   sig += mL*mPolyzPackedBytes;
 
   /* Encode h */
+  for(i = 0; i < mOmega + mK; ++i)
+    sig[i] = 0;
+
   k = 0;
   for(i = 0; i < mK; ++i) {
     for(j = 0; j < mN; ++j)
@@ -261,41 +303,27 @@ void Dilithium::PackSig(byte *sig, const polyvec *z, const polyvec *h, const pol
 
     sig[mOmega + i] = k;
   }
-  while(k < mOmega) sig[k++] = 0;
-  sig += mOmega + mK;
-
-  /* Encode c */
-  signs = 0;
-  mask = 1;
-  for(i = 0; i < mN/8; ++i) {
-    sig[i] = 0;
-    for(j = 0; j < 8; ++j) {
-      if(c->at(8*i+j) != 0) {
-        sig[i] |= (1U << j);
-        if(c->at(8*i+j) == (mQ - 1)) signs |= mask;
-        mask <<= 1;
-      }
-    }
-  }
-  sig += mN/8;
-  for(i = 0; i < 8; ++i)
-    sig[i] = signs >> 8*i;
 }
 
 
-/* Unpack signature sig = (z, h, c).
-* Arguments:   - polyvec *z: pointer to output vector z
+/* Unpack signature sig = (c, h, z).
+* Arguments: 
+*              - byte *c: pointer to output challenge hash
+                - polyvec *z: pointer to output vector z
 *              - polyvec *h: pointer to output hint vector h
-*              - poly *c: pointer to output challenge polynomial
+
 *              - const byte *sig: pointer to byte array containing
 *                bit-packed signature
 *
 * Returns 1 in case of malformed signature; otherwise 0.
 */
-int Dilithium::UnpackSig(polyvec *z, polyvec *h, poly *c, const byte *sig)
+int Dilithium::UnpackSig(byte *c, polyvec *z, polyvec *h, const byte *sig)
 {
   word32 i, j, k;
-  word64 signs;
+  
+  for(i = 0; i < mSeedBytes; ++i)
+    c[i] = sig[i];
+  sig += mSeedBytes;
 
   for(i = 0; i < mL; ++i)
     PolyzUnpack(&z->at(i), sig + i*mPolyzPackedBytes);
@@ -324,93 +352,66 @@ int Dilithium::UnpackSig(polyvec *z, polyvec *h, poly *c, const byte *sig)
     if(sig[j])
       return 1;
 
-  sig += mOmega + mK;
-
-  /* Decode c */
-  for(i = 0; i < mN; ++i)
-    c->at(i) = 0;
-
-  signs = 0;
-  for(i = 0; i < 8; ++i)
-    signs |= (uint64_t)sig[mN/8+i] << 8*i;
-
-  /* Extra sign bits are zero for strong unforgeability */
-  if(signs >> 60)
-    return 1;
-
-  for(i = 0; i < mN/8; ++i) {
-    for(j = 0; j < 8; ++j) {
-      if((sig[i] >> j) & 0x01) {
-        c->at(8*i+j) = 1;
-        c->at(8*i+j) ^= -(signs & 1) & (1 ^ (mQ-1));
-        signs >>= 1;
-      }
-    }
-  }
-
   return 0;
 }
 
 
 /*
-* For finite field element a with 0 <= a <= Q*2^32,
-* compute r \equiv a*2^{-32} (mod Q) such that 0 <= r < 2*Q.
-* Arguments:   - word64: finite field element a
+* For finite field element a with mQ*(-2)^31 <= a <= mQ*2^31,
+* compute r \equiv a*2^{-32} (mod Q) such that -mQ <= r < mQ.
+* Arguments:   - sword64: finite field element a
 *
 * Returns r.
 */
-word32 Dilithium::MontgomeryReduce(word64 a) {
-  word64 t;
+sword32 Dilithium::MontgomeryReduce(sword64 a) {
+  sword32 t;
 
-  t = a * mQInv;
-  t &= ((word64)1 << 32) - 1;
-  t *= mQ;
-  t = a + t;
-  t >>= 32;
+  t = (sword64)(sword32)a*mQInv;
+  t = (a - (sword64)t*mQ) >> 32;
+
   return t;
 }
 
 /* 
-* For finite field element a, compute r \equiv a (mod Q)
-* such that 0 <= r < 2*Q.
-* Arguments:   - word32: finite field element a
+* For finite field element a with a <= 2^{31} - 2^{22} - 1, compute r \equiv a (mod Q)
+* such that -6283009 <= r <= 6283007.
+* Arguments:   - sword32: finite field element a
 *
 * Returns r.
 */
-word32 Dilithium::Reduce32(word32 a) {
-  word32 t;
+sword32 Dilithium::Reduce32(sword32 a) {
+  sword32 t;
 
-  t = a & 0x7FFFFF;
-  a >>= 23;
-  t += (a << 13) - a;
+  t = (a + (1 << 22)) >> 23;
+  t = a - t*mQ;
   return t;
-}
-
-/*
-* Subtract Q if input coefficient is bigger than Q.
-*
-* Arguments:   - word32: finite field element a
-*
-* Returns r.
-*/
-word32 Dilithium::CSubQ(word32 a) {
-  a -= mQ;
-  a += ((sword32)a >> 31) & mQ;
-  return a;
 }
 
 /* 
 *  For finite field element a, compute standard
-* representative r = a mod Q.
-* Arguments:   - word32: finite field element a
+* representative r = a mod^+ Q.
+* Arguments:   - sword32: finite field element a
 *
 * Returns r.
 */
-word32 Dilithium::Freeze(word32 a) {
+sword32 Dilithium::Freeze(sword32 a) {
   a = Reduce32(a);
-  a = CSubQ(a);
+  a = CAddQ(a);
   return a;
 }
+
+/*
+* Add Q if input coefficient is negative.
+*
+* Arguments:   - sword32: finite field element a
+*
+* Returns r.
+*/
+sword32 Dilithium::CAddQ(sword32 a) {
+  a += (a >> 31) & mQ;
+  return a;
+}
+
 
 
 /*
