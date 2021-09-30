@@ -155,13 +155,13 @@ int Dilithium::Signature(byte *sig, size_t *sigLen, const byte *m, size_t mLen, 
   Shake256Absorb(&state, m, mLen);
   Shake256Finalize(&state);
   Shake256Squeeze(mu, mCrhBytes, &state);
-//#ifdef DILITHIUM_RANDOMIZED_SIGNING
-//  RandomBytes(rhoprime, mCrhBytes);
-//#else§
-  SHAKE256 shake = SHAKE256(mCrhBytes);
-  shake.Update(key, mSeedBytes + mCrhBytes);
-  shake.Final(rhoprime);
-//#endif
+  if (mRandomized) {
+    RandomBytes(rhoprime, mCrhBytes);
+  } else {
+    SHAKE256 shake = SHAKE256(mCrhBytes);
+    shake.Update(key, mSeedBytes + mCrhBytes);
+    shake.Final(rhoprime);
+  }
 
   /* Expand matrix and transform vectors */
   ExpandMat(&mat, rho);
@@ -196,7 +196,7 @@ int Dilithium::Signature(byte *sig, size_t *sigLen, const byte *m, size_t mLen, 
     Shake256Absorb(&state, sig, mK*mPolyw1PackedBytes);
     Shake256Finalize(&state);
     Shake256Squeeze(sig, mSeedBytes, &state);
-    //TODO: mahdollinen virhekohta
+
     Challenge(&challengePoly, sig);
 
     PolyNtt(&challengePoly);

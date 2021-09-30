@@ -34,7 +34,11 @@ public:
     int Open(byte *m, size_t *mLen, const byte *sm, size_t smLen, const byte *pk);
 
     void RandomBytes(byte *out, size_t outlen);
-
+    //Set to randomized mode by calling this
+    int setRandomizedSignature() {
+        mRandomized = true;
+        return 0;
+    }
 
 private:
     //Dilithium parameters
@@ -63,6 +67,10 @@ private:
     sword32 mMont = -4186625;
     sword32 mQInv = 58728449;
 
+    //Randomized signing. Deterministic by default
+    bool mRandomized = false;
+
+    
 
     //Polynomial stuff
     typedef std::array<sword32, 256> poly;
@@ -206,7 +214,7 @@ public:
 
 class Dilithium3: public Dilithium {
 public:
-    //Paramters for mode 3 Dilithium
+    //Parameters for mode 3 Dilithium
     Dilithium3() : Dilithium(6, 5, 4, 49, 196, 1 << 19, 8380416/32, 55, 128, 640, 128) {};
 
     //Parameters for the help of the user
@@ -217,7 +225,7 @@ public:
 
 class Dilithium5: public Dilithium {
 public:
-    //Parametrs for mode 4 Dilithium
+    //Parameters for mode 5 Dilithium
     Dilithium5() : Dilithium(8, 7, 2, 60, 120, 1 << 19, 8380416/32, 75, 96, 640, 128) {};
 
     //Parameters for the help of the user
