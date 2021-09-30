@@ -222,8 +222,8 @@ int Dilithium2TestRandomized() {
     do {
       dilithium.RandomBytes(m2, 1);
     } while(!m2[0]);
-    sm[j % (MLEN + Dilithium2::BYTES)] += m2[0];
     ret = dilithium.Open(m2, &mLen, sm, smLen, pk);
+    sm[j % (MLEN + Dilithium2::BYTES)] += m2[0];
     if(!ret) {
       std::cout << "Randomized Dilithium2: Trivial forgeries possible" << std::endl;
       return 1;

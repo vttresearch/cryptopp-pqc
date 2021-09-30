@@ -9,6 +9,20 @@ implementation of Dilithium by the CRYSTALS team
 #include "shake.h"
 
 NAMESPACE_BEGIN(CryptoPP)
+void fprintBstr(char *S, unsigned char *A, unsigned long long L)
+{
+	unsigned long long  i;
+
+	printf("%s", S);
+
+	for ( i=0; i<L; i++ )
+ 		printf("%02X", A[i]);
+
+ 	if ( L == 0 )
+ 		printf("00");
+
+ 	printf("\n");
+}
 
 
 /*
