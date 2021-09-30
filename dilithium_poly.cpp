@@ -406,13 +406,14 @@ void Dilithium::PolyUniformEta(poly *a, const byte *seed, word16 nonce)
 
 void Dilithium::PolyUniformGamma1(poly *a, const byte *seed, word16 nonce)
 {
-  word16 polyUniformGamma1m1NBlocks = (mPolyzPackedBytes + SHAKE256_RATE - 1)/SHAKE256_RATE;
-  byte buf[polyUniformGamma1m1NBlocks*SHAKE256_RATE];
+  word16 polyUniformGamma1NBlocks = (mPolyzPackedBytes + SHAKE256_RATE - 1)/SHAKE256_RATE;
+  std::vector<byte> bufVector(polyUniformGamma1NBlocks*SHAKE256_RATE);
+  std::vector<byte> *buf = &bufVector;
   keccakState state;
 
   Shake256StreamInit(&state, seed, nonce);
-  Shake256SqueezeBlocks(buf, polyUniformGamma1m1NBlocks, &state);
-  PolyzUnpack(a, buf);
+  Shake256SqueezeBlocks(buf->data(), polyUniformGamma1NBlocks, &state);
+  PolyzUnpack(a, buf->data());
 }
 
 /*
