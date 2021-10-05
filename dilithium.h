@@ -23,7 +23,7 @@ public:
 
     //Constructor. This is used by classes extending Dilithium (practically different modes of Dilithium)
     //Constructor is defined in dilithium.cpp
-    Dilithium(byte k, byte l, byte eta, byte tau, word16 beta, word32 gamma1, word32 gamma2, word16 omega, word16 polyEtaPacked, 
+    Dilithium(byte k, byte l, byte eta, byte tau, word16 beta, sword32 gamma1, sword32 gamma2, word16 omega, word16 polyEtaPacked, 
         word16 polyzPackedBytes, byte polyw1PackedBytes);
 
     
@@ -48,13 +48,13 @@ private:
     sword32 mQ = 8380417;
     word16 mRootOfUnity = 1753;
     byte mD = 13;
-    sword32 mGamma1;
-    sword32 mGamma2;
     byte mK;
     byte mL;
-    byte mTau;
     byte mEta;
+    byte mTau;
     word16 mBeta;
+    sword32 mGamma1;
+    sword32 mGamma2;
     byte mOmega;
     word16 mPolyt1PackedBytes = 320;
     word16 mPolyt0PackedBytes = 416;

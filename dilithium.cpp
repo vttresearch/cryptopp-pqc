@@ -9,20 +9,6 @@ implementation of Dilithium by the CRYSTALS team
 #include "shake.h"
 
 NAMESPACE_BEGIN(CryptoPP)
-void fprintBstr(char *S, unsigned char *A, unsigned long long L)
-{
-	unsigned long long  i;
-
-	printf("%s", S);
-
-	for ( i=0; i<L; i++ )
- 		printf("%02X", A[i]);
-
- 	if ( L == 0 )
- 		printf("00");
-
- 	printf("\n");
-}
 
 
 /*
@@ -35,7 +21,8 @@ void fprintBstr(char *S, unsigned char *A, unsigned long long L)
 */
 void Dilithium::Challenge(poly *c, const byte *mu)
 {
-  word32 i, b, pos;
+  word32 i;
+  word32 b, pos;
   word64 signs;
   std::vector<byte> bufVector (SHAKE256_RATE);
   std::vector<byte> *buf = &bufVector; 
@@ -81,7 +68,8 @@ void Dilithium::Challenge(poly *c, const byte *mu)
 * Returns 0 (success)
 */
 int Dilithium::Keypair(byte *pk, byte *sk) {
-  std::vector<byte> seedBufVector(2*mSeedBytes + mCrhBytes);
+  word32 bufLen = 2*mSeedBytes + mCrhBytes;
+  std::vector<byte> seedBufVector(bufLen);
   std::vector<byte> *seedBuf = &seedBufVector;
   //byte tr[mCrhBytes];
   std::vector<byte> trVector(mSeedBytes);
@@ -95,7 +83,7 @@ int Dilithium::Keypair(byte *pk, byte *sk) {
 
   /* Get randomness for rho, rhoprime and key */
   RandomBytes(seedBuf->data(), mSeedBytes);
-  SHAKE256 shake = SHAKE256(2*mSeedBytes + mCrhBytes);
+  SHAKE256 shake = SHAKE256(bufLen);
   shake.Update(seedBuf->data(), mSeedBytes);
   shake.Final(seedBuf->data());
   rho = seedBuf->data();
@@ -144,9 +132,9 @@ int Dilithium::Keypair(byte *pk, byte *sk) {
 */
 int Dilithium::Signature(byte *sig, size_t *sigLen, const byte *m, size_t mLen, const byte *sk)
 {
-  word32 i, n;
-  //byte seedbuf[2*mSeedBytes + 3*mCrhBytes];
-  std::vector<byte> seedBufVector(3*mSeedBytes + 2*mCrhBytes);
+  word32 n;
+  word32 bufLen = 3*mSeedBytes + 2*mCrhBytes;
+  std::vector<byte> seedBufVector(bufLen);
   std::vector<byte> *seedBuf = &seedBufVector;
   byte *rho, *tr, *key, *mu, *rhoprime;
   word16 nonce = 0;
@@ -418,7 +406,7 @@ int Dilithium::Open(byte *m, size_t *mLen, const byte *sm, size_t smLen, const b
 
 
 //Constructor
-Dilithium::Dilithium(byte k, byte l, byte eta, byte tau, word16 beta, word32 gamma1, word32 gamma2, word16 omega, word16 polyEtaPacked, 
+Dilithium::Dilithium(byte k, byte l, byte eta, byte tau, word16 beta, sword32 gamma1, sword32 gamma2, word16 omega, word16 polyEtaPacked, 
         word16 polyzPackedBytes, byte polyw1PackedBytes):
     mK(k),
     mL(l),

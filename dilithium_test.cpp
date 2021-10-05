@@ -13,7 +13,7 @@ NAMESPACE_BEGIN(CryptoPP)
 NAMESPACE_BEGIN(Test)
 
 #define MLEN 59
-#define NTESTS 1
+#define NTESTS 1000
 
 
 
