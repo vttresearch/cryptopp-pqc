@@ -290,16 +290,16 @@ word32 Dilithium::RejUniform(sword32 *a, word32 len, const byte *buf, word32 buf
 *              - const byte seed[]: byte array with seed of length SEEDBYTES
 *              - word16 nonce: 2-byte nonce
 */
-#define POLY_UNIFORM_NBLOCKS ((768+168-1)/168)
 void Dilithium::PolyUniform(poly *a, const byte *seed, word16 nonce)
 {
   word32 i, ctr, off;
-  word32 bufLen = POLY_UNIFORM_NBLOCKS*SHAKE128_RATE;
-  byte buf[POLY_UNIFORM_NBLOCKS*SHAKE128_RATE + 2];
+  word32 mPolyUniformNBlocks = (768 + SHAKE128_RATE - 1)/SHAKE128_RATE; 
+  word32 bufLen = mPolyUniformNBlocks*SHAKE128_RATE;
+  byte buf[mPolyUniformNBlocks*SHAKE128_RATE + 2];
   keccakState state;
 
   Shake128StreamInit(&state, seed, nonce);
-  Shake128SqueezeBlocks(buf, POLY_UNIFORM_NBLOCKS, &state);
+  Shake128SqueezeBlocks(buf, mPolyUniformNBlocks, &state);
 
   ctr = RejUniform(a->data(), mN, buf, bufLen);
 

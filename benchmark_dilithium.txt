@@ -1,18 +1,18 @@
 Benchmarking Dilithium2
 Number of tests: 10000
-Average keypair time: 199343
-Average sign time: 863738
-Average open time: 226239
+Average keypair time: 179997
+Average sign time: 763505
+Average open time: 203898
 
 Benchmarking Dilithium3
 Number of tests: 10000
-Average keypair time: 364708
-Average sign time: 1400987
-Average open time: 361072
+Average keypair time: 329310
+Average sign time: 1250759
+Average open time: 324805
 
 Benchmarking Dilithium5
 Number of tests: 10000
-Average keypair time: 545991
-Average sign time: 1705079
-Average open time: 589444
+Average keypair time: 495546
+Average sign time: 1526795
+Average open time: 534903
 
