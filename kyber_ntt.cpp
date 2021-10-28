@@ -8,54 +8,47 @@ implementation of kyber by the CRYSTALS team
 
 NAMESPACE_BEGIN(CryptoPP)
 
-template<int T_K, unsigned int T_Compr>
-const int16_t Kyber<T_K, T_Compr>::zetas[128] = {
-  2285, 2571, 2970, 1812, 1493, 1422, 287, 202, 3158, 622, 1577, 182, 962,
-  2127, 1855, 1468, 573, 2004, 264, 383, 2500, 1458, 1727, 3199, 2648, 1017,
-  732, 608, 1787, 411, 3124, 1758, 1223, 652, 2777, 1015, 2036, 1491, 3047,
-  1785, 516, 3321, 3009, 2663, 1711, 2167, 126, 1469, 2476, 3239, 3058, 830,
-  107, 1908, 3082, 2378, 2931, 961, 1821, 2604, 448, 2264, 677, 2054, 2226,
-  430, 555, 843, 2078, 871, 1550, 105, 422, 587, 177, 3094, 3038, 2869, 1574,
-  1653, 3083, 778, 1159, 3182, 2552, 1483, 2727, 1119, 1739, 644, 2457, 349,
-  418, 329, 3173, 3254, 817, 1097, 603, 610, 1322, 2044, 1864, 384, 2114, 3193,
-  1218, 1994, 2455, 220, 2142, 1670, 2144, 1799, 2051, 794, 1819, 2475, 2459,
-  478, 3221, 3021, 996, 991, 958, 1869, 1522, 1628
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+const sword16 Kyber<T_K, T_C, T_C2, T_ETA1>::zetas[128] = {
+  -1044,  -758,  -359, -1517,  1493,  1422,   287,   202,
+  -171,   622,  1577,   182,   962, -1202, -1474,  1468,
+  573, -1325,   264,   383,  -829,  1458, -1602,  -130,
+  -681,  1017,   732,   608, -1542,   411,  -205, -1571,
+  1223,   652,  -552,  1015, -1293,  1491,  -282, -1544,
+  516,    -8,  -320,  -666, -1618, -1162,   126,  1469,
+  -853,   -90,  -271,   830,   107, -1421,  -247,  -951,
+  -398,   961, -1508,  -725,   448, -1065,   677, -1275,
+  -1103,   430,   555,   843, -1251,   871,  1550,   105,
+  422,   587,   177,  -235,  -291,  -460,  1574,  1653,
+  -246,   778,  1159,  -147,  -777,  1483,  -602,  1119,
+  -1590,   644,  -872,   349,   418,   329,  -156,   -75,
+  817,  1097,   603,   610,  1322, -1285, -1465,   384,
+  -1215,  -136,  1218, -1335,  -874,   220, -1187, -1659,
+  -1185, -1530, -1278,   794, -1510,  -854,  -870,   478,
+  -108,  -308,   996,   991,   958, -1460,  1522,  1628
 };
 
-template<int T_K, unsigned int T_Compr>
-const int16_t Kyber<T_K, T_Compr>::zetas_inv[128] = {
-  1701, 1807, 1460, 2371, 2338, 2333, 308, 108, 2851, 870, 854, 1510, 2535,
-  1278, 1530, 1185, 1659, 1187, 3109, 874, 1335, 2111, 136, 1215, 2945, 1465,
-  1285, 2007, 2719, 2726, 2232, 2512, 75, 156, 3000, 2911, 2980, 872, 2685,
-  1590, 2210, 602, 1846, 777, 147, 2170, 2551, 246, 1676, 1755, 460, 291, 235,
-  3152, 2742, 2907, 3224, 1779, 2458, 1251, 2486, 2774, 2899, 1103, 1275, 2652,
-  1065, 2881, 725, 1508, 2368, 398, 951, 247, 1421, 3222, 2499, 271, 90, 853,
-  1860, 3203, 1162, 1618, 666, 320, 8, 2813, 1544, 282, 1838, 1293, 2314, 552,
-  2677, 2106, 1571, 205, 2918, 1542, 2721, 2597, 2312, 681, 130, 1602, 1871,
-  829, 2946, 3065, 1325, 2756, 1861, 1474, 1202, 2367, 3147, 1752, 2707, 171,
-  3127, 3042, 1907, 1836, 1517, 359, 758, 1441
-};
 
 
 //Multiplication followed by Montgomery reduction
 //Returns 16-bit integer congruent to a*b*R^{-1} mod q
-template<int T_K, unsigned int T_Compr>
-int16_t Kyber<T_K, T_Compr>::Fqmul(int16_t a, int16_t b) {
-  return MontgomeryReduce((int32_t)a*b);
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+sword16 Kyber<T_K, T_C, T_C2, T_ETA1>::Fqmul(sword16 a, sword16 b) {
+  return MontgomeryReduce((sword32)a*b);
 }
 
 //Inplace number-theoretic transform (NTT) in Rq
 //input is in standard order, output is in bitreversed order
-template<int T_K, unsigned int T_Compr>
-void Kyber<T_K, T_Compr>::Ntt(int16_t r[256]) {
-  unsigned int len, start, j, k;
-  int16_t t, zeta;
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+void Kyber<T_K, T_C, T_C2, T_ETA1>::Ntt(sword16 r[256]) {
+  word32 len, start, j, k;
+  sword16 t, zeta;
 
   k = 1;
   for(len = 128; len >= 2; len >>= 1) {
     for(start = 0; start < 256; start = j + len) {
       zeta = zetas[k++];
-      for(j = start; j < start + len; ++j) {
+      for(j = start; j < start + len; j++) {
         t = Fqmul(zeta, r[j + len]);
         r[j + len] = r[j] - t;
         r[j] = r[j] + t;
@@ -67,37 +60,37 @@ void Kyber<T_K, T_Compr>::Ntt(int16_t r[256]) {
 //Inplace inverse number-theoretic transform in Rq and
 //multiplication by Montgomery factor 2^16.
 //Input is in bitreversed order, output is in standard order
-template<int T_K, unsigned int T_Compr>
-void Kyber<T_K, T_Compr>::InvNtt(int16_t r[256]) {
-  unsigned int start, len, j, k;
-  int16_t t, zeta;
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+void Kyber<T_K, T_C, T_C2, T_ETA1>::InvNtt(sword16 r[256]) {
+  word32 start, len, j, k;
+  sword16 t, zeta;
+  const sword16 f = 1441; // mont^2/128
 
-  k = 0;
+  k = 127;
   for(len = 2; len <= 128; len <<= 1) {
     for(start = 0; start < 256; start = j + len) {
-      zeta = zetas_inv[k++];
+      zeta = zetas[k--];
       for(j = start; j < start + len; ++j) {
         t = r[j];
         r[j] = BarrettReduce(t + r[j + len]);
-        r[j + len] = t - r[j + len];
+        r[j + len] = r[j + len] - t;
         r[j + len] = Fqmul(zeta, r[j + len]);
       }
     }
   }
 
   for(j = 0; j < 256; ++j)
-    r[j] = Fqmul(r[j], zetas_inv[127]);
+    r[j] = Fqmul(r[j], f);
 }
-
-//int16_t r[2]:       pointer to the output polynomial
-//const int16_t a[2]: pointer to the first factor
-//const int16_t b[2]: pointer to the second factor
-//int16_t zeta:       integer defining the reduction polynomial
-template<int T_K, unsigned int T_Compr>
-void Kyber<T_K, T_Compr>::Basemul(int16_t r[2],
-             const int16_t a[2],
-             const int16_t b[2],
-             int16_t zeta)
+//sword16 r[2]:       pointer to the output polynomial
+//const sword16 b[2]: pointer to the second factor
+//sword16 zeta:       integer defining the reduction polynomial
+//const sword16 a[2]: pointer to the first factor
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+void Kyber<T_K, T_C, T_C2, T_ETA1>::Basemul(sword16 r[2],
+             const sword16 a[2],
+             const sword16 b[2],
+             sword16 zeta)
 {
   r[0]  = Fqmul(a[1], b[1]);
   r[0]  = Fqmul(r[0], zeta);
@@ -107,8 +100,8 @@ void Kyber<T_K, T_Compr>::Basemul(int16_t r[2],
   r[1] += Fqmul(a[1], b[0]);
 }
 
-template class Kyber<2, 320>;
-template class Kyber<3, 320>;
-template class Kyber<4, 352>;
+template class Kyber<2, 320, 128, 3>;
+template class Kyber<3, 320, 128, 2>;
+template class Kyber<4, 352, 160, 2>;
 
 NAMESPACE_END

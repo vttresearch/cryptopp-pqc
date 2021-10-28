@@ -4,69 +4,52 @@ implementation of kyber by the CRYSTALS team
 
 #include "pch.h"
 #include "kyber.h"
-
-#include "sha3.h"
-#include "shake.h"
 #include "misc.h"
 
 NAMESPACE_BEGIN(CryptoPP)
 
 // Generates public and private key
 // for CCA-secure Kyber key encapsulation mechanism
-template<int T_K, unsigned int T_Compr>
-int Kyber<T_K, T_Compr>::KemKeypair(unsigned char *pk, unsigned char *sk)
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+sword32 Kyber<T_K, T_C, T_C2, T_ETA1>::KemKeypair(byte  *pk, byte *sk)
 {
   size_t i; 
   IndCpaKeypair(pk, sk);
   for(i=0;i<INDCPA_PUBLICKEYBYTES;i++) {
     sk[i+INDCPA_SECRETKEYBYTES] = pk[i];
   }
-  SHA3_256 sha3_256 = SHA3_256();
-  sha3_256.Update(pk, PUBLICKEYBYTES);
-  sha3_256.Final(sk+SECRETKEYBYTES-2*SYMBYTES);
+  
+  Sha3_256(sk+SECRETKEYBYTES-2*SYMBYTES, pk, PUBLICKEYBYTES);
   /* Value z for pseudo-random output on reject */
  
-  randombytes(sk+SECRETKEYBYTES-SYMBYTES, SYMBYTES);
+  RandomBytes(sk+SECRETKEYBYTES-SYMBYTES, SYMBYTES);
   return 0;
 }
 
 // Generates cipher text and shared
 // secret for given public key
-template<int T_K, unsigned int T_Compr>
-int Kyber<T_K,T_Compr>::KemEnc(unsigned char *ct, unsigned char *ss, const unsigned char *pk)
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+sword32 Kyber<T_K, T_C, T_C2, T_ETA1>::KemEnc(byte *ct, byte *ss, const byte *pk)
 {
-  uint8_t buf[2*SYMBYTES];
+  byte buf[2*SYMBYTES];
   /* Will contain key, coins */
-  uint8_t kr[2*SYMBYTES];
+  byte kr[2*SYMBYTES];
   
-  randombytes(buf, SYMBYTES);
+  RandomBytes(buf, SYMBYTES);
   /* Don't release system RNG output */
-  SHA3_256 sha3 = SHA3_256();
-  sha3.Update(buf, SYMBYTES);
-  sha3.Final(buf);
-
-  sha3.Restart();
+  Sha3_256(buf, buf, SYMBYTES);
 
   /* Multitarget countermeasure for coins + contributory KEM */
-  sha3.Update(pk, PUBLICKEYBYTES);
-  sha3.Final(buf+ SYMBYTES);
-
-  sha3.Restart();
-
-  SHA3_512 sha3_512 = SHA3_512();
-  sha3_512.Update(buf, 2* SYMBYTES);
-  sha3_512.Final(kr);
-
+  Sha3_256(buf + SYMBYTES, pk, PUBLICKEYBYTES);
+  
+  Sha3_512(kr, buf, 2 * SYMBYTES);
   /* coins are in kr+KYBER_SYMBYTES */
-  IndCpaEnc(ct, buf, pk, kr+ SYMBYTES);
+  IndCpaEnc(ct, buf, pk, kr+ SYMBYTES); 
 
   /* overwrite coins in kr with H(c) */
-  sha3.Update(ct, CIPHERTEXTBYTES);
-  sha3.Final(kr+SYMBYTES);
+  Sha3_256(kr + SYMBYTES, ct, CIPHERTEXTBYTES);
   /* hash concatenation of pre-k and H(c) to k */
-  SHAKE256 shake = SHAKE256(32);
-  shake.Update(kr, 2*SYMBYTES);
-  shake.Final(ss);
+  Shake256(ss, 32, kr, 2* SYMBYTES);
   return 0;
 }
 
@@ -74,16 +57,16 @@ int Kyber<T_K,T_Compr>::KemEnc(unsigned char *ct, unsigned char *ss, const unsig
 // Generates shared secret for given
 // cipher text and private key
 // On failure, ss will contain a pseudo-random value.
-template<int T_K, unsigned int T_Compr>
-int Kyber<T_K,T_Compr>::KemDec(unsigned char *ss, const unsigned char *ct, const unsigned char *sk)
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+sword32 Kyber<T_K, T_C, T_C2, T_ETA1>::KemDec(byte *ss, const byte *ct, const byte *sk)
 {
   size_t i;
-  int fail;
-  uint8_t buf[2*SYMBYTES];
+  sword32 fail;
+  byte buf[2*SYMBYTES];
   /* Will contain key, coins */
-  uint8_t kr[2*SYMBYTES];
-  uint8_t cmp[CIPHERTEXTBYTES];
-  const uint8_t *pk = sk+INDCPA_SECRETKEYBYTES;
+  byte kr[2*SYMBYTES];
+  byte cmp[CIPHERTEXTBYTES];
+  const byte *pk = sk+INDCPA_SECRETKEYBYTES;
 
   IndCpaDec(buf, ct, sk);
 
@@ -91,62 +74,50 @@ int Kyber<T_K,T_Compr>::KemDec(unsigned char *ss, const unsigned char *ct, const
   for(i=0;i<SYMBYTES;i++) {
     buf[SYMBYTES+i] = sk[SECRETKEYBYTES-2*SYMBYTES+i];
   }
-  SHA3_512 sha3_512 = SHA3_512();
-  sha3_512.Update(buf, 2*SYMBYTES);
-  sha3_512.Final(kr);
+  Sha3_512(kr, buf, 2*SYMBYTES);
 
   /* coins are in kr+KYBER_SYMBYTES */
   IndCpaEnc(cmp, buf, pk, kr+SYMBYTES);
   fail = !(VerifyBufsEqual(ct, cmp, CIPHERTEXTBYTES));
 
   /* overwrite coins in kr with H(c) */
-  SHA3_256 sha3_256 = SHA3_256();
-  sha3_256.Update(ct, CIPHERTEXTBYTES);
-  sha3_256.Final(kr+SYMBYTES);
+  Sha3_256(kr + SYMBYTES, ct, CIPHERTEXTBYTES);
 
   /* Overwrite pre-k with z on re-encryption failure */
   Cmov(kr, sk+SECRETKEYBYTES-SYMBYTES, SYMBYTES, fail);
 
   /* hash concatenation of pre-k and H(c) to k */
-  SHAKE256 shake = SHAKE256(32);
-  shake.Update(kr, 2*SYMBYTES);
-  shake.Final(ss);
+  Shake256(ss, 32, kr, 2*SYMBYTES);
   return 0;
 }
 
 
 // Generates public and private key for the CPA-secure
 // public-key encryption scheme underlying Kyber
-template<int T_K, unsigned int T_Compr>
-void Kyber<T_K,T_Compr>::IndCpaKeypair(uint8_t *pk, uint8_t *sk) {
-  unsigned int i;
-  uint8_t buf[2*SYMBYTES];
-  const uint8_t *publicseed = buf;
-  const uint8_t *noiseseed = buf+SYMBYTES;
-  uint8_t nonce = 0;
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+void Kyber<T_K, T_C, T_C2, T_ETA1>::IndCpaKeypair(byte *pk, byte *sk) {
+  word32 i;
+  byte buf[2*SYMBYTES];
+  const byte *publicseed = buf;
+  const byte *noiseseed = buf+SYMBYTES;
+  byte nonce = 0;
 
 
   polyvec a[K];
 
-  //   poly a[kyber_k][kyber_k];
   polyvec e, pkpv, skpv;
 
-  randombytes(buf, SYMBYTES);
-
-  SHA3_512 sha3_512 = SHA3_512();
-
-  sha3_512.Update(buf, SYMBYTES);
-  sha3_512.Final(buf);
-
+  RandomBytes(buf, SYMBYTES);
+  Sha3_512(buf, buf, SYMBYTES);
 
   GenMatrix(a, publicseed, 0);
 
   for(i=0;i<K;i++) {
-    PolyGetNoise(&skpv.vec[i], noiseseed, nonce++);
+    PolyGetNoise(&skpv.vec[i], noiseseed, nonce++, ETA1);
   }
       
   for(i=0;i<K;i++) {
-    PolyGetNoise(&e.vec[i], noiseseed, nonce++);
+    PolyGetNoise(&e.vec[i], noiseseed, nonce++, ETA1);
   }
 
   PolyvecNtt(&skpv);
@@ -154,7 +125,7 @@ void Kyber<T_K,T_Compr>::IndCpaKeypair(uint8_t *pk, uint8_t *sk) {
 
   // matrix-vector multiplication
   for(i=0;i<K;i++) {
-      PolyvecPointwiseAccMontgomery(&pkpv.vec[i], &a[i], &skpv);
+      PolyvecBasemulAccMontgomery(&pkpv.vec[i], &a[i], &skpv);
       PolyToMont(&pkpv.vec[i]);
   }
 
@@ -169,12 +140,12 @@ void Kyber<T_K,T_Compr>::IndCpaKeypair(uint8_t *pk, uint8_t *sk) {
 
 // Encryption function of the CPA-secure
 // public-key encryption scheme underlying Kyber.
-template<int T_K, unsigned int T_Compr>
-void Kyber<T_K,T_Compr>::IndCpaEnc(uint8_t *c, const uint8_t *m, const uint8_t *pk, const uint8_t *coins)
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+void Kyber<T_K, T_C, T_C2, T_ETA1>::IndCpaEnc(byte *c, const byte *m, const byte *pk, const byte *coins)
 {
-  unsigned int i;
-  uint8_t seed[SYMBYTES];
-  uint8_t nonce = 0;
+  word32 i;
+  byte seed[SYMBYTES];
+  byte nonce = 0;
   polyvec sp, pkpv, ep, at[K], bp;
   poly v, k, epp;
 
@@ -183,23 +154,21 @@ void Kyber<T_K,T_Compr>::IndCpaEnc(uint8_t *c, const uint8_t *m, const uint8_t *
   GenMatrix(at, seed, 1);
 
   for(i=0;i<K;i++) {
-    PolyGetNoise(sp.vec+i, coins, nonce++);
+    PolyGetNoise(sp.vec+i, coins, nonce++, ETA1);
   }
   for(i=0;i<K;i++) {
-    PolyGetNoise(ep.vec+i, coins, nonce++);
+    PolyGetNoise(ep.vec+i, coins, nonce++, ETA2);
   }
     
-  PolyGetNoise(&epp, coins, nonce++);
-
+  PolyGetNoise(&epp, coins, nonce++, ETA2);
   PolyvecNtt(&sp);
-
   // matrix-vector multiplication
   for(i=0;i<K;i++) {
-    PolyvecPointwiseAccMontgomery(&bp.vec[i], &at[i], &sp);
+    PolyvecBasemulAccMontgomery(&bp.vec[i], &at[i], &sp);
   }
     
 
-  PolyvecPointwiseAccMontgomery(&v, &pkpv, &sp);
+  PolyvecBasemulAccMontgomery(&v, &pkpv, &sp);
 
   PolyvecInvNttToMont(&bp);
   PolyInvNttToMont(&v);
@@ -213,11 +182,10 @@ void Kyber<T_K,T_Compr>::IndCpaEnc(uint8_t *c, const uint8_t *m, const uint8_t *
   PackCiphertext(c, &bp, &v);
 }
 
-// ecryption function of the CPA-secure
+// Decryption function of the CPA-secure
 // public-key encryption scheme underlying Kyber.
-
-template<int T_K, unsigned int T_Compr>
-void Kyber<T_K,T_Compr>::IndCpaDec(uint8_t *m, const uint8_t *c, const uint8_t *sk)
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+void Kyber<T_K, T_C, T_C2, T_ETA1>::IndCpaDec(byte *m, const byte *c, const byte *sk)
 {
   polyvec bp, skpv;
   poly v, mp;
@@ -226,7 +194,7 @@ void Kyber<T_K,T_Compr>::IndCpaDec(uint8_t *m, const uint8_t *c, const uint8_t *
   UnpackSk(&skpv, sk);
 
   PolyvecNtt(&bp);
-  PolyvecPointwiseAccMontgomery(&mp, &skpv, &bp);
+  PolyvecBasemulAccMontgomery(&mp, &skpv, &bp);
   PolyInvNttToMont(&mp);
 
   PolySub(&mp, &v, &mp);
@@ -241,24 +209,25 @@ void Kyber<T_K,T_Compr>::IndCpaDec(uint8_t *m, const uint8_t *c, const uint8_t *
 /* Run rejection sampling on uniform random bytes to generate
 * uniform random integers mod q (rej_uniform function of 
 * example implementation)*/
-template<int T_K, unsigned int T_Compr>
-unsigned int Kyber<T_K,T_Compr>::RejUniform(int16_t *r, unsigned int len, const uint8_t *buf, unsigned int buflen) {
-  unsigned int ctr, pos;
-  uint16_t val;
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+word32 Kyber<T_K, T_C, T_C2, T_ETA1>::RejUniform(sword16 *r, word32 len, const byte *buf, word32 buflen) {
+  word32 ctr, pos;
+  word16 val0, val1;
 
   ctr = pos = 0;
-  while(ctr < len && pos + 2 <= buflen) {
-    val = buf[pos] | ((uint16_t)buf[pos+1] << 8);
-    pos += 2;
+  while(ctr < len && pos + 3 <= buflen) {
+    val0 = ((buf[pos+0] >> 0) | ((word16)buf[pos+1] << 8)) & 0xFFF;
+    val1 = ((buf[pos+1] >> 4) | ((word16)buf[pos+2] << 4)) & 0xFFF;
+    pos += 3;
 
-    if(val < 19*Q) {
-      val -= (val >> 12)*Q; // Barrett reduction
-      r[ctr++] = (int16_t)val;
+    if(val0 < Q) {
+      r[ctr++] = val0;
+    }
+    if (ctr < len && val1 < Q) {
+      r[ctr++] = val1;
     }
   }
-
   return ctr;
-
 };
 
 
@@ -266,35 +235,38 @@ unsigned int Kyber<T_K,T_Compr>::RejUniform(int16_t *r, unsigned int len, const 
 //from a seed. Entries of the matrix are polynomials that look
 //uniformly random. Performs rejection sampling on output of
 //a XOF
-template<int T_K, unsigned int T_Compr>
-void Kyber<T_K,T_Compr>::GenMatrix(polyvec *a, const uint8_t *seed, int transposed)
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+void Kyber<T_K, T_C, T_C2, T_ETA1>::GenMatrix(polyvec *a, const byte *seed, sword32 transposed)
 {
-  unsigned int ctr, i, j;
-  const int xof_blockbytes = 168;
-  const size_t gen_matrix_nblocks = ((2*N*(1U << 16)/(19*Q) + xof_blockbytes)/xof_blockbytes);
-  uint8_t buf[gen_matrix_nblocks*xof_blockbytes];
-  keccak_state state;
+  word32 ctr, i, j, k;
+  word32 bufLen, off;
+  const sword32 xofBlockBytes = 168;
+  const size_t genMatrixNBlocks = ((12*N/8*(1 << 12)/Q + xofBlockBytes)/xofBlockBytes);
+  byte buf[genMatrixNBlocks*xofBlockBytes+2];
 
-
+  Shake128Init();
   for(i=0;i<K;i++) {
     for(j=0;j<K;j++) {
       if(transposed) {
-        XOFAbsorb(&state, seed, i, j);
+        KyberShake128Absorb(seed, i, j);
       }
 
       else {
 
-        XOFAbsorb(&state, seed, j, i);
+        KyberShake128Absorb(seed, j, i);
       }
       
-      XOFSqueezeBlocks(buf, gen_matrix_nblocks, &state);
-
-      ctr = RejUniform(a[i].vec[j].coeffs, N, buf, sizeof(buf));
-      
+      Shake128SqueezeBlocks(buf, genMatrixNBlocks);
+      bufLen = genMatrixNBlocks*xofBlockBytes;
+      ctr = RejUniform(a[i].vec[j].coeffs, N, buf, bufLen);
+     
       while(ctr < N) {
-        XOFSqueezeBlocks(buf, 1, &state);
-        ctr += RejUniform(a[i].vec[j].coeffs + ctr, N - ctr, buf,
-                           xof_blockbytes);
+        off = bufLen % 3;
+        for(k = 0; k < off; k++)
+          buf[k] = buf[bufLen - off + k];
+        Shake128SqueezeBlocks(buf + off, 1);
+        bufLen = off + xofBlockBytes;
+        ctr += RejUniform(a[i].vec[j].coeffs + ctr, N - ctr, buf, bufLen);
       }
     }
   }
@@ -304,8 +276,8 @@ void Kyber<T_K,T_Compr>::GenMatrix(polyvec *a, const uint8_t *seed, int transpos
 // Serialize the public key as concatenation of the
 // serialized vector of polynomials pk
 // and the public seed used to generate the matrix A.
-template<int T_K, unsigned int T_Compr>
-void Kyber<T_K,T_Compr>::PackPk(uint8_t *r, polyvec *pk, const uint8_t *seed)
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+void Kyber<T_K, T_C, T_C2, T_ETA1>::PackPk(byte *r, polyvec *pk, const byte *seed)
 {
   size_t i;
   PolyvecToBytes(r, pk);
@@ -315,9 +287,8 @@ void Kyber<T_K,T_Compr>::PackPk(uint8_t *r, polyvec *pk, const uint8_t *seed)
 
 // De-serialize public key from a byte array;
 // approximate inverse of pack_pk
-
-template<int T_K, unsigned int T_Compr>
-void Kyber<T_K,T_Compr>::UnpackPk(polyvec *pk, uint8_t *seed, const uint8_t *packedpk)
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+void Kyber<T_K, T_C, T_C2, T_ETA1>::UnpackPk(polyvec *pk, byte *seed, const byte *packedpk)
 {
   size_t i;
   PolyvecFromBytes(pk, packedpk);
@@ -327,17 +298,16 @@ void Kyber<T_K,T_Compr>::UnpackPk(polyvec *pk, uint8_t *seed, const uint8_t *pac
 
 
 //Serialize the secret key
-
-template<int T_K, unsigned int T_Compr>
-void Kyber<T_K,T_Compr>::PackSk(uint8_t *r, polyvec *sk)
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+void Kyber<T_K, T_C, T_C2, T_ETA1>::PackSk(byte *r, polyvec *sk)
 {
   PolyvecToBytes(r, sk);
 }
 
 
 //De-serialize the secret key
-template<int T_K, unsigned int T_Compr>
-void Kyber<T_K,T_Compr>::UnpackSk(polyvec *sk, const uint8_t *packedsk)
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+void Kyber<T_K, T_C, T_C2, T_ETA1>::UnpackSk(polyvec *sk, const byte *packedsk)
 {
   PolyvecFromBytes(sk, packedsk);
 }
@@ -345,8 +315,8 @@ void Kyber<T_K,T_Compr>::UnpackSk(polyvec *sk, const uint8_t *packedsk)
 // Serialize the ciphertext as concatenation of the
 // compressed and serialized vector of polynomials b
 // and the compressed and serialized polynomial v
-template<int T_K, unsigned int T_Compr>
-void Kyber<T_K,T_Compr>::PackCiphertext(uint8_t *r, polyvec *b, poly *v)
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+void Kyber<T_K, T_C, T_C2, T_ETA1>::PackCiphertext(byte *r, polyvec *b, poly *v)
 {
   PolyvecCompress(r, b);
   PolyCompress(r+POLYVECCOMPRESSEDBYTES, v);
@@ -354,16 +324,16 @@ void Kyber<T_K,T_Compr>::PackCiphertext(uint8_t *r, polyvec *b, poly *v)
 
 //De-serialize and decompress ciphertext from a byte array;
 //approximate inverse of PackCiphertext
-template<int T_K, unsigned int T_Compr>
-void Kyber<T_K,T_Compr>::UnpackCiphertext(polyvec *b, poly *v, const uint8_t *c)
+template<sword32 T_K, word32 T_C,  word32 T_C2, byte T_ETA1>
+void Kyber<T_K, T_C, T_C2, T_ETA1>::UnpackCiphertext(polyvec *b, poly *v, const byte *c)
 {
   PolyvecDecompress(b, c);
   PolyDecompress(v, c+POLYVECCOMPRESSEDBYTES);
 }
 
-template class Kyber<2, 320>;
-template class Kyber<3, 320>;
-template class Kyber<4, 352>;
+template class Kyber<2, 320, 128, 3>;
+template class Kyber<3, 320, 128, 2>;
+template class Kyber<4, 352, 160, 2>;
  
 
 

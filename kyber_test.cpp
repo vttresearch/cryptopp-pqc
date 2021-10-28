@@ -7,7 +7,6 @@ implementation of kyber by the CRYSTALS team
 #include <iostream>
 #include "kyber_test.h"
 #include "kyber.h"
-#include "sha3.h"
 
 
 NAMESPACE_BEGIN(CryptoPP)
@@ -18,6 +17,7 @@ NAMESPACE_BEGIN(Test)
 
 int TestKeys512()
 {
+  std::cout << "Testing Kyber-512" << std::endl;
   unsigned int i;
   unsigned char pk[Kyber512::PUBLICKEYBYTES];
   unsigned char sk[Kyber512::SECRETKEYBYTES];
@@ -37,22 +37,24 @@ int TestKeys512()
     //Alice uses Bobs response to get her shared key
     kyber.KemDec(key_a, ct, sk);
 
-    if(memcmp(key_a, key_b, Kyber512::SHAREDSECRETBYTES)) {
+    if(!VerifyBufsEqual(key_a, key_b, Kyber512::SHAREDSECRETBYTES)) {
 
         pass = false;
     }
       
   }
   if (pass) {
+    std::cout << "Kyber-512 tests passed" << std::endl;
     return 0;
   } else {
-    std::cout << "Key error in Kyber-512" << std::endl;
+    std::cout << "Kyber-512 tests failed" << std::endl;
     return 1;
   }
 }
 
 int TestKeys768()
 {
+  std::cout << "Testing Kyber-768" << std::endl;
   unsigned int i;
   unsigned char pk[Kyber768::PUBLICKEYBYTES];
   unsigned char sk[Kyber768::SECRETKEYBYTES];
@@ -72,22 +74,24 @@ int TestKeys768()
     //Alice uses Bobs response to get her shared key
     kyber.KemDec(key_a, ct, sk);
 
-    if(memcmp(key_a, key_b, Kyber768::SHAREDSECRETBYTES)) {
+    if(!VerifyBufsEqual(key_a, key_b, Kyber768::SHAREDSECRETBYTES)) {
 
         pass = false;
     }
       
   }
   if (pass) {
+    std::cout << "Kyber-768 tests passed" << std::endl;
     return 0;
   } else {
-    std::cout << "Key error in Kyber-768" << std::endl;
+    std::cout << "Kyber-768 tests failed" << std::endl;
     return 1;
   }
 }
 
 int TestKeys1024()
 {
+      std::cout << "Testing Kyber-1024" << std::endl;
   unsigned int i;
   unsigned char pk[Kyber1024::PUBLICKEYBYTES];
   unsigned char sk[Kyber1024::SECRETKEYBYTES];
@@ -107,16 +111,17 @@ int TestKeys1024()
     //Alice uses Bobs response to get her shared key
     kyber.KemDec(key_a, ct, sk);
 
-    if(memcmp(key_a, key_b, Kyber1024::SHAREDSECRETBYTES)) {
+    if(!VerifyBufsEqual(key_a, key_b, Kyber1024::SHAREDSECRETBYTES)) {
 
         pass = false;
     }
       
   }
   if (pass) {
+    std::cout << "Kyber-1024 tests passed" << std::endl;
     return 0;
   } else {
-    std::cout << "Key error in Kyber-1024" << std::endl;
+    std::cout << "Kyber-1024 tests failed" << std::endl;
     return 1;
   }
 }
@@ -141,11 +146,11 @@ static int TestInvalidSkA()
 
     //Replace secret key with random values
     
-    kyber.randombytes(sk, Kyber768::SECRETKEYBYTES);
+    kyber.RandomBytes(sk, Kyber768::SECRETKEYBYTES);
     //Alice uses Bobs response to get her shared key
     kyber.KemDec(key_a, ct, sk);
 
-    if(!memcmp(key_a, key_b, Kyber768::SHAREDSECRETBYTES)) {
+    if(VerifyBufsEqual(key_a, key_b, Kyber768::SHAREDSECRETBYTES)) {
       std::cout << "ERROR invalid sk" << std::endl;
       pass = false;
     }
@@ -175,7 +180,7 @@ static int TestInvalidCiphertext()
   bool pass = true;
 
   for(i=0;i<NTESTS;i++) {
-    kyber.randombytes((unsigned char *)&pos, sizeof(size_t));
+    kyber.RandomBytes((unsigned char *)&pos, sizeof(size_t));
 
     //Alice generates a public key
     kyber.KemKeypair(pk, sk);
@@ -189,8 +194,8 @@ static int TestInvalidCiphertext()
     //Alice uses Bobs response to get her shared key
     kyber.KemDec(key_a, ct, sk);
 
-    if(!memcmp(key_a, key_b, Kyber768::SHAREDSECRETBYTES)) {
-      std::cout << "ERROR invalid ciphertext\n" << std::endl;
+    if(VerifyBufsEqual(key_a, key_b, Kyber768::SHAREDSECRETBYTES)) {
+      std::cout << "ERROR invalid ciphertext" << std::endl;
       pass = false;
     }
       

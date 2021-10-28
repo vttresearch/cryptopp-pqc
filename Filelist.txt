@@ -265,6 +265,8 @@ ppc_power8.cpp
 ppc_power9.cpp
 ppc_simd.cpp
 ppc_simd.h
+pqc_fips202.cpp
+pqc_fips202.h
 pssr.cpp
 pssr.h
 pubkey.cpp

@@ -73,7 +73,7 @@ LIB_SRCS = \
     mars.cpp marss.cpp md2.cpp md4.cpp md5.cpp misc.cpp modes.cpp mqueue.cpp \
     mqv.cpp nbtheory.cpp neon_simd.cpp oaep.cpp osrng.cpp padlkrng.cpp \
     panama.cpp pkcspad.cpp poly1305.cpp polynomi.cpp ppc_power7.cpp \
-    ppc_power8.cpp ppc_power9.cpp ppc_simd.cpp pssr.cpp pubkey.cpp queue.cpp \
+    ppc_power8.cpp ppc_power9.cpp ppc_simd.cpp pqc_fips202.cpp pssr.cpp pubkey.cpp queue.cpp \
     rabbit.cpp rabin.cpp randpool.cpp rc2.cpp rc5.cpp rc6.cpp rdrand.cpp \
     rdtables.cpp rijndael.cpp rijndael_simd.cpp ripemd.cpp rng.cpp rsa.cpp \
     rw.cpp saber.cpp saber_poly.cpp saber_utils.cpp safer.cpp salsa.cpp scrypt.cpp seal.cpp seed.cpp serpent.cpp \
@@ -94,7 +94,7 @@ LIB_OBJS = \
     cast.obj casts.obj cbcmac.obj ccm.obj chacha.obj chacha_avx.obj \
     chacha_simd.obj chachapoly.obj cham.obj cham_simd.obj channels.obj \
     cmac.obj crc.obj crc_simd.obj darn.obj default.obj des.obj dessp.obj \
-    dh.obj dh2.obj dilithium.obj dilithium_ntt.obj dilithium_poly.obj dilithium_utils.dll dll.obj donna_32.obj donna_64.obj donna_sse.obj dsa.obj \
+    dh.obj dh2.obj dilithium.obj dilithium_ntt.obj dilithium_poly.obj dilithium_utils.obj dll.obj donna_32.obj donna_64.obj donna_sse.obj dsa.obj \
     eax.obj ec2n.obj eccrypto.obj ecp.obj elgamal.obj emsa2.obj eprecomp.obj \
     esign.obj files.obj filters.obj fips140.obj fipstest.obj gcm.obj \
     gcm_simd.obj gf256.obj gf2_32.obj gf2n.obj gf2n_simd.obj gfpcrypt.obj \
@@ -104,7 +104,7 @@ LIB_OBJS = \
     mars.obj marss.obj md2.obj md4.obj md5.obj misc.obj modes.obj mqueue.obj \
     mqv.obj nbtheory.obj neon_simd.obj oaep.obj osrng.obj padlkrng.obj \
     panama.obj pkcspad.obj poly1305.obj polynomi.obj ppc_power7.obj \
-    ppc_power8.obj ppc_power9.obj ppc_simd.obj pssr.obj pubkey.obj queue.obj \
+    ppc_power8.obj ppc_power9.obj ppc_simd.obj pqc_fips202.obj pssr.obj pubkey.obj queue.obj \
     rabbit.obj rabin.obj randpool.obj rc2.obj rc5.obj rc6.obj rdrand.obj \
     rdtables.obj rijndael.obj rijndael_simd.obj ripemd.obj rng.obj rsa.obj \
     rw.obj saber.obj saber_poly.obj saber_utils.obj safer.obj salsa.obj scrypt.obj seal.obj seed.obj serpent.obj \
