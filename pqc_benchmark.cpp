@@ -7,6 +7,7 @@
  and SABER by the SABER team (https://github.com/KULeuven-COSIC/SABER)
 */
 
+#include "pch.h"
 #include "pqc_benchmark.h"
 #include "dilithium.h"
 #include "kyber.h"

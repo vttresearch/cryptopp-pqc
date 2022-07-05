@@ -47,15 +47,15 @@ public:
 
     
 
-
-
-private:
     CRYPTOPP_CONSTANT(SHAKE128_RATE=168);
     CRYPTOPP_CONSTANT(SHAKE256_RATE=136);
     CRYPTOPP_CONSTANT(SHA3_256_RATE=136);
     CRYPTOPP_CONSTANT(SHA3_512_RATE=72);
+private:
+
     FixedSizeSecBlock<word64, 25> mState;
-    byte mPos;
+   //word64 mState[25];
+    word32 mPos;
 
     void KeccakInit();
     void KeccakAbsorb(word32 rate, const byte *input, size_t inputLen);

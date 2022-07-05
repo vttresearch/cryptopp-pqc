@@ -296,10 +296,9 @@ void Dilithium::PolyUniform(poly *a, const byte *seed, word16 nonce)
   word32 mPolyUniformNBlocks = (768 + SHAKE128_RATE - 1)/SHAKE128_RATE; 
   word32 bufLen = mPolyUniformNBlocks*SHAKE128_RATE;
   byte buf[mPolyUniformNBlocks*SHAKE128_RATE + 2];
-  keccakState state;
 
-  Shake128StreamInit(&state, seed, nonce);
-  Shake128SqueezeBlocks(buf, mPolyUniformNBlocks, &state);
+  Shake128StreamInit(seed, nonce);
+  Shake128SqueezeBlocks(buf, mPolyUniformNBlocks);
 
   ctr = RejUniform(a->data(), mN, buf, bufLen);
 
@@ -309,7 +308,7 @@ void Dilithium::PolyUniform(poly *a, const byte *seed, word16 nonce)
       buf[i] = buf[bufLen - off + i];
 
     
-    Shake128SqueezeBlocks(buf + off, 1, &state);
+    Shake128SqueezeBlocks(buf + off, 1);
     bufLen = SHAKE128_RATE + off;
     ctr += RejUniform(a->data() + ctr, mN - ctr, buf, bufLen);
   }
@@ -380,15 +379,14 @@ void Dilithium::PolyUniformEta(poly *a, const byte *seed, word16 nonce)
   word32 bufLen = polyUniformEtaNBlocks*SHAKE128_RATE;
   std::vector<byte> bufVector(bufLen);
   std::vector<byte> *buf = &bufVector;
-  keccakState state;
 
-  Shake256StreamInit(&state, seed, nonce);
-  Shake256SqueezeBlocks(buf->data(), polyUniformEtaNBlocks, &state);
+  Shake256StreamInit(seed, nonce);
+  Shake256SqueezeBlocks(buf->data(), polyUniformEtaNBlocks);
 
   ctr = RejEta(a->data(), mN, buf->data(), bufLen);
 
   while(ctr < mN) {
-    Shake256SqueezeBlocks(buf->data(), 1, &state);
+    Shake256SqueezeBlocks(buf->data(), 1);
     ctr += RejEta(a->data() + ctr, mN - ctr, buf->data(), SHAKE256_RATE);
   }
 }
@@ -409,10 +407,9 @@ void Dilithium::PolyUniformGamma1(poly *a, const byte *seed, word16 nonce)
   word16 polyUniformGamma1NBlocks = (mPolyzPackedBytes + SHAKE256_RATE - 1)/SHAKE256_RATE;
   std::vector<byte> bufVector(polyUniformGamma1NBlocks*SHAKE256_RATE);
   std::vector<byte> *buf = &bufVector;
-  keccakState state;
 
-  Shake256StreamInit(&state, seed, nonce);
-  Shake256SqueezeBlocks(buf->data(), polyUniformGamma1NBlocks, &state);
+  Shake256StreamInit(seed, nonce);
+  Shake256SqueezeBlocks(buf->data(), polyUniformGamma1NBlocks);
   PolyzUnpack(a, buf->data());
 }
 

@@ -6,7 +6,6 @@ implementation of Dilithium by the CRYSTALS team
 
 #include "pch.h"
 #include "dilithium.h"
-#include "shake.h"
 
 NAMESPACE_BEGIN(CryptoPP)
 
@@ -26,12 +25,11 @@ void Dilithium::Challenge(poly *c, const byte *mu)
   word64 signs;
   std::vector<byte> bufVector (SHAKE256_RATE);
   std::vector<byte> *buf = &bufVector; 
-  keccakState state;
 
-  Shake256Init(&state);
-  Shake256Absorb(&state, mu, mSeedBytes);
-  Shake256Finalize(&state);
-  Shake256SqueezeBlocks(buf->data(), 1, &state);
+  Shake256Init();
+  Shake256Absorb(mu, mSeedBytes);
+  Shake256Finalize();
+  Shake256SqueezeBlocks(buf->data(), 1);
 
   signs = 0;
   for(i = 0; i < 8; ++i)
@@ -45,12 +43,12 @@ void Dilithium::Challenge(poly *c, const byte *mu)
   for(i = mN - mTau; i < mN; ++i) {
     do {
         if(pos >= SHAKE256_RATE) {
-        Shake256SqueezeBlocks(buf->data(), 1, &state);
+        Shake256SqueezeBlocks(buf->data(), 1);
         pos = 0;
       }
       b = buf->at(pos++); 
     } while(b > i);
-
+    
     c->at(i) = c->at(b);
     c->at(b) = 1 - 2*(signs & 1);
     signs >>= 1;
@@ -83,9 +81,7 @@ int Dilithium::Keypair(byte *pk, byte *sk) {
 
   /* Get randomness for rho, rhoprime and key */
   RandomBytes(seedBuf->data(), mSeedBytes);
-  SHAKE256 shake = SHAKE256(bufLen);
-  shake.Update(seedBuf->data(), mSeedBytes);
-  shake.Final(seedBuf->data());
+  Shake256(seedBuf->data(), bufLen, seedBuf->data(), mSeedBytes);
   rho = seedBuf->data();
   rhoprime = rho + mSeedBytes;
   key = rhoprime + mCrhBytes;
@@ -112,9 +108,7 @@ int Dilithium::Keypair(byte *pk, byte *sk) {
   PackPk(pk, rho, &t1);
 
   /* Compute CRH(rho, t1) and write secret key */
-  SHAKE256 shakeTr = SHAKE256(mSeedBytes);
-  shakeTr.Update(pk, mPublicKeyBytes);
-  shakeTr.Final(tr->data());
+  Shake256(tr->data(), mSeedBytes, pk, mPublicKeyBytes);
   PackSk(sk, rho, tr->data(), key, &t0, &s1, &s2);
   return 0;
 }
@@ -143,7 +137,7 @@ int Dilithium::Signature(byte *sig, size_t *sigLen, const byte *m, size_t mLen, 
   std::vector<polyvec> mat (mK, matPolyvec);
   polyvec s1 (mL), y (mL), z (mL);
   polyvec t0 (mK), s2 (mK), w1 (mK), w0 (mK), h (mK);
-  keccakState state;
+
 
   rho = seedBuf->data();
   tr = rho + mSeedBytes;
@@ -152,17 +146,16 @@ int Dilithium::Signature(byte *sig, size_t *sigLen, const byte *m, size_t mLen, 
   rhoprime = mu + mCrhBytes;
   UnpackSk(rho, tr, key, &t0, &s1, &s2, sk);
   /* Compute CRH(tr, msg) */
-  Shake256Init(&state);
-  Shake256Absorb(&state, tr, mSeedBytes);
-  Shake256Absorb(&state, m, mLen);
-  Shake256Finalize(&state);
-  Shake256Squeeze(mu, mCrhBytes, &state);
+  Shake256Init();
+  Shake256Absorb(tr, mSeedBytes);
+  Shake256Absorb(m, mLen);
+  Shake256Finalize();
+  Shake256Squeeze(mu, mCrhBytes);
   if (mRandomized) {
     RandomBytes(rhoprime, mCrhBytes);
   } else {
-    SHAKE256 shake = SHAKE256(mCrhBytes);
-    shake.Update(key, mSeedBytes + mCrhBytes);
-    shake.Final(rhoprime);
+    Shake256(rhoprime, mCrhBytes, key, mSeedBytes + mCrhBytes);
+    
   }
 
   /* Expand matrix and transform vectors */
@@ -193,11 +186,11 @@ int Dilithium::Signature(byte *sig, size_t *sigLen, const byte *m, size_t mLen, 
 
     Polyvecw1Pack(sig, &w1, mK);
 
-    Shake256Init(&state);
-    Shake256Absorb(&state, mu, mCrhBytes);
-    Shake256Absorb(&state, sig, mK*mPolyw1PackedBytes);
-    Shake256Finalize(&state);
-    Shake256Squeeze(sig, mSeedBytes, &state);
+    Shake256Init();
+    Shake256Absorb(mu, mCrhBytes);
+    Shake256Absorb(sig, mK*mPolyw1PackedBytes);
+    Shake256Finalize();
+    Shake256Squeeze(sig, mSeedBytes);
 
     Challenge(&challengePoly, sig);
 
@@ -306,7 +299,6 @@ int Dilithium::Verify(const byte *sig, size_t sigLen, const byte *m, size_t mLen
   std::vector<polyvec> mat(mK, matPolyvec);
   polyvec z(mL);
   polyvec t1(mK), h(mK), w1(mK);
-  keccakState state;
   if(sigLen != mBytes)
     return -1;
 
@@ -317,14 +309,13 @@ int Dilithium::Verify(const byte *sig, size_t sigLen, const byte *m, size_t mLen
     return -1;
 
   /* Compute CRH(H(rho, t1), msg) */
-  SHAKE256 shake = SHAKE256(mSeedBytes);
-  shake.Update(pk, mPublicKeyBytes);
-  shake.Final(mu->data());
-  Shake256Init(&state);
-  Shake256Absorb(&state, mu->data(), mSeedBytes);
-  Shake256Absorb(&state, m, mLen);
-  Shake256Finalize(&state);
-  Shake256Squeeze(mu->data(), mCrhBytes, &state);
+  Shake256(mu->data(), mSeedBytes, pk, mPublicKeyBytes);
+
+  Shake256Init();
+  Shake256Absorb(mu->data(), mSeedBytes);
+  Shake256Absorb(m, mLen);
+  Shake256Finalize();
+  Shake256Squeeze(mu->data(), mCrhBytes);
 
   /* Matrix-vector multiplication; compute Az - c2^dt1 */
   Challenge(&challengePoly, c->data());
@@ -350,11 +341,11 @@ int Dilithium::Verify(const byte *sig, size_t sigLen, const byte *m, size_t mLen
 
 
   /* Call random oracle and verify challenge */
-  Shake256Init(&state);
-  Shake256Absorb(&state, mu->data(), mCrhBytes);
-  Shake256Absorb(&state, buf->data(), mK*mPolyw1PackedBytes);
-  Shake256Finalize(&state);
-  Shake256Squeeze(c2 -> data(), mSeedBytes, &state);
+  Shake256Init();
+  Shake256Absorb(mu->data(), mCrhBytes);
+  Shake256Absorb(buf->data(), mK*mPolyw1PackedBytes);
+  Shake256Finalize();
+  Shake256Squeeze(c2 -> data(), mSeedBytes);
   for(i = 0; i < mSeedBytes; ++i)
     if(c->at(i) != c2->at(i))
       return -1;

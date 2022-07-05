@@ -7,17 +7,13 @@ implementation of Dilithium by the CRYSTALS team
 #define CRYPTOPP_DILITHIUM_H
 
 #include "cryptlib.h"
+#include "pqc_fips202.h"
 #include <array>
 
 
 NAMESPACE_BEGIN(CryptoPP)
 
-#define SHAKE128_RATE (168)
-#define SHAKE256_RATE (136)
-#define SHA3_128_RATE (72)
-#define SHA3_256_RATE (168)
-
-class Dilithium
+class Dilithium : public PQCFips202
 {
 public:
 
@@ -39,6 +35,8 @@ public:
         mRandomized = true;
         return 0;
     }
+
+  
 
 private:
     //Dilithium parameters
@@ -76,12 +74,6 @@ private:
     typedef std::array<sword32, 256> poly;
     typedef std::vector<poly> polyvec;
 
-    //Keccak state struct 
-    typedef struct {
-        word64 s[25];
-        word32 pos;
-    } keccakState;
-
     void Challenge(poly *c, const byte *mu);
 
 
@@ -106,24 +98,9 @@ private:
     sword32 Freeze(sword32 a);
     sword32 CAddQ(sword32 a);
 
-    //Custom SHAKE 
-    void Shake128StreamInit(keccakState *state, const byte *seed, word16 nonce);
-    void Shake256StreamInit(keccakState *state, const byte *seed, word16 nonce);
-    void KeccakInit(keccakState *state);
-    word32 KeccakAbsorb(word64 s[25], word32 r, word32 pos, const byte *m, size_t mlen);
-    void KeccakFinalize(word64 s[25], word32 r, word32 pos, byte p);
-    void KeccakSqueezeBlocks(byte *out, size_t nBlocks, word64 s[25], word32 r);
-    word32 KeccakSqueeze(byte *out, size_t outlen, word64 s[25], word32 r, word32 pos);
-    void Shake128Init(keccakState *state);
-    void Shake128Absorb(keccakState *state, const byte *in, size_t inlen);
-    void Shake128Finalize(keccakState *state);
-    void Shake128SqueezeBlocks(byte *out, size_t nBlocks, keccakState *state);
-    void Shake128Squeeze(byte *out, size_t outLen, keccakState *state);
-    void Shake256Init(keccakState *state);
-    void Shake256Absorb(keccakState *state, const byte *in, size_t inLen);
-    void Shake256Finalize(keccakState *state);
-    void Shake256SqueezeBlocks(byte *out, size_t nBlocks, keccakState *state);
-    void Shake256Squeeze(byte *out, size_t outLen, keccakState *state);
+    //SHAKE stream
+    void Shake128StreamInit(const byte *seed, word16 nonce);
+    void Shake256StreamInit(const byte *seed, word16 nonce);
     
 
 

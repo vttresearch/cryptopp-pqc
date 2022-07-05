@@ -9,6 +9,7 @@ ORIGINAL LICENSE OF fips202.c
 
 #include "pch.h"
 #include "pqc_fips202.h"
+#include <iostream>
 
 NAMESPACE_BEGIN(CryptoPP)
 
@@ -69,13 +70,16 @@ void PQCFips202::KeccakAbsorb(word32 rate, const byte *input, size_t inputLen) {
   word32 i;
 
   while(mPos+inputLen >= rate) {
-    xorbuf(mState.BytePtr(), input, rate);    
+    for(i=mPos;i<rate;i++) {
+      mState.data()[i/8] ^= (word64)*input++ << 8*(i%8);   
+    }
+      
     inputLen -= rate-mPos;
     KeccakF1600(mState);
     mPos = 0;
   }
   for(i=mPos;i<mPos+inputLen;i++) {
-    mState.BytePtr()[i] ^= *input++;
+    mState.data()[i/8] ^= (word64)*input++ << 8*(i%8);
   }
   mPos = i;
 }
@@ -88,8 +92,8 @@ void PQCFips202::KeccakAbsorb(word32 rate, const byte *input, size_t inputLen) {
 */
 void PQCFips202::KeccakFinalize(word32 rate, byte p)
 {
-  mState.BytePtr()[mPos/8] ^= (word64)p << 8*(mPos%8);
-  mState.BytePtr()[rate/8-1] ^= 1ULL << 63;
+  mState.data()[mPos/8] ^= (word64)p << 8*(mPos%8);
+  mState.data()[rate/8-1] ^= 1ULL << 63;
 }
 
 
@@ -114,7 +118,7 @@ void PQCFips202::KeccakSqueeze(byte *output, size_t outputLen, word32 rate)
       mPos = 0;
     }
     for(i=mPos;i < rate && i < mPos+outputLen; i++)
-      *output++ = mState.BytePtr()[i];
+      *output++ = mState.data()[i/8] >> 8*(i%8);
     outputLen -= i-mPos;
     mPos = i;
   }
@@ -136,14 +140,16 @@ void PQCFips202::KeccakAbsorbOnce(word32 rate, const byte *input, size_t inputLe
   memset(mState, 0, mState.SizeInBytes());
 
   while(inputLen >= rate) {
-    xorbuf(mState.BytePtr(), input, rate);
+    for(i=0;i<rate/8;i++)
+      mState.data()[i] ^= Load64(input+8*i);
     input += rate;
     inputLen -= rate;
     KeccakF1600(mState);
   }
-  xorbuf(mState.BytePtr(), input, inputLen);
-  mState.BytePtr()[inputLen] ^= p;
-  mState.BytePtr()[rate-1] ^= 0x80;
+  for(i=0;i<inputLen;i++)
+    mState.data()[i/8] ^= (word64)input[i] << 8*(i%8);
+  mState.data()[i/8] ^= (word64)p << 8*(i%8);
+  mState.data()[(rate-1)/8] ^= 1ULL << 63;
 
 }
 
@@ -163,7 +169,8 @@ void PQCFips202::KeccakSqueezeBlocks(byte *output, size_t nBlocks, word32 rate)
 
   while(nBlocks) {
     KeccakF1600(mState);
-    std::memcpy(output, mState.BytePtr(), rate);
+   for(i=0;i<rate/8;i++)
+      Store64(output+8*i, mState.data()[i]);
     output += rate;
     nBlocks -= 1;
   }
@@ -233,7 +240,7 @@ void PQCFips202::Shake128AbsorbOnce(const byte *input, size_t inputLen)
 * started (mPos = SHAKE128_RATE).
 *
 *              - byte *output: pointer to output blocks
-*              - size_t nBlocks: number of blocks to be squeezed (written to output)
+*              - size_t nBlocks: number of blocks to be squeezed (written to output)      
 */
 void PQCFips202::Shake128SqueezeBlocks(byte *output, size_t nBlocks)
 {
@@ -362,7 +369,8 @@ void PQCFips202::Sha3_256(byte h[32], const byte *input, size_t inputLen)
 
   KeccakAbsorbOnce(SHA3_256_RATE, input, inputLen, 0x06);
   KeccakF1600(mState);
-  std::memcpy(h, mState, 32);
+  for(i=0;i<4;i++)
+    Store64(h+8*i,mState.data()[i]);
 }
 
 /*
@@ -378,7 +386,8 @@ void PQCFips202::Sha3_512(byte h[64], const byte *input, size_t inputLen)
 
   KeccakAbsorbOnce(SHA3_512_RATE, input, inputLen, 0x06);
   KeccakF1600(mState);
-  std::memcpy(h, mState, 64);
+  for(i=0;i<8;i++)
+    Store64(h+8*i,mState.data()[i]);
 
 }
 
