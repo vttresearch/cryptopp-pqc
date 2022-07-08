@@ -20,7 +20,7 @@ NAMESPACE_BEGIN(Test)
 int Dilithium2Test()
 {
   std::cout << "Running Dilithium2 tests" << std::endl;
-  word32 i, j;
+  size_t i, j;
   int ret;
   size_t mLen, smLen;
   byte m[MLEN + Dilithium2::BYTES];
@@ -32,7 +32,7 @@ int Dilithium2Test()
   for(i = 0; i < NTESTS; ++i) {
     dilithium.RandomBytes(m, MLEN);
     dilithium.Keypair(pk, sk);
-    
+
     dilithium.Sign(sm, &smLen, m, MLEN, sk);
 
     ret = dilithium.Open(m2, &mLen, sm, smLen, pk);
@@ -72,7 +72,7 @@ int Dilithium2Test()
 int Dilithium3Test()
 {
   std::cout << "Running Dilithium3 tests" << std::endl;
-  word32 i, j;
+  size_t i, j;
   int ret;
   size_t mLen, smLen;
   byte m[MLEN + Dilithium3::BYTES];
@@ -126,7 +126,7 @@ int Dilithium3Test()
 int Dilithium5Test()
 {
   std::cout << "Running Dilithium5 tests" << std::endl;
-  word32 i, j;
+  size_t i, j;
   int ret;
   size_t mLen, smLen;
   byte m[MLEN + Dilithium5::BYTES];
@@ -182,7 +182,7 @@ int Dilithium5Test()
  */
 int Dilithium2TestRandomized() {
   std::cout << "Running Dilithium2 randomized tests" << std::endl;
-  word32 i, j;
+  size_t i, j;
   int ret;
   size_t mLen, smLen;
   byte m[MLEN + Dilithium2::BYTES];
@@ -239,7 +239,7 @@ int Dilithium2TestRandomized() {
  */
 int Dilithium3TestRandomized() {
   std::cout << "Running Dilithium3 randomized tests" << std::endl;
-  word32 i, j;
+  size_t i, j;
   int ret;
   size_t mLen, smLen;
   byte m[MLEN + Dilithium3::BYTES];
@@ -295,7 +295,7 @@ int Dilithium3TestRandomized() {
  */
 int Dilithium5TestRandomized() {
   std::cout << "Running Dilithium5 randomized tests" << std::endl;
-  word32 i, j;
+  size_t i, j;
   int ret;
   size_t mLen, smLen;
   byte m[MLEN + Dilithium5::BYTES];

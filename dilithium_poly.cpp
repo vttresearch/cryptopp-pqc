@@ -376,7 +376,7 @@ void Dilithium::PolyUniformEta(poly *a, const byte *seed, word16 nonce)
 
   };
 
-  word32 bufLen = polyUniformEtaNBlocks*SHAKE128_RATE;
+  word32 bufLen = polyUniformEtaNBlocks*SHAKE256_RATE;
   std::vector<byte> bufVector(bufLen);
   std::vector<byte> *buf = &bufVector;
 

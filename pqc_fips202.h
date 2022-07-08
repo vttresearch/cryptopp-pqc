@@ -1,6 +1,6 @@
 /* The header file for PQC FIPS 202. Adapted from the reference
 FIPS 202 implementation of kyber by the CRYSTALS team 
-(https://github.com/pq-crystals/kyber fips202.c and fips202.h) by Julius Hekkala
+(https://github.com/pq-crystals/kyber fips202.c and fips202.h)
 ORIGINAL LICENSE OF FIPS202.c
  * Based on the public domain implementation in crypto_hash/keccakc512/simple/ from
  * http://bench.cr.yp.to/supercop.html by Ronny Van Keer and the public domain "TweetFips202"
