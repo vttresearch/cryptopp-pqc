@@ -472,6 +472,9 @@ int scoped_main(int argc, char *argv[])
 		else if (command == "kyberb") {
 			BenchmarkKyberVersions();
 		}
+		else if (command == "frodob") {
+			BenchmarkFrodoVersions();
+		}
 		else if (command == "pqcbench") {
 			BenchmarkKyberVersions();
 			BenchmarkDilithiumVersions();

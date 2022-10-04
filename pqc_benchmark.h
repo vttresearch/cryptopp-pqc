@@ -18,6 +18,8 @@ void BenchmarkKyberVersions();
 
 void BenchmarkSaberVersions();
 
+void BenchmarkFrodoVersions();
+
 void BenchmarkLightSaber();
 void BenchmarkSaber();
 void BenchmarkFireSaber();
@@ -31,7 +33,9 @@ void BenchmarkKyber512();
 void BenchmarkKyber768();
 void BenchmarkKyber1024();
 
-
+void BenchmarkFrodo640();
+void BenchmarkFrodo976();
+void BenchmarkFrodo1344();
 
 
 
