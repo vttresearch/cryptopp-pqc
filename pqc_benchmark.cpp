@@ -1,10 +1,36 @@
-/*
+/**
  C++ file for benchmarking PQC implementations
  Implemented by Julius Hekkala. The benchmarks are based on the tests
  of the algorithms. The tests are based on the reference implementations of 
  kyber by the CRYSTALS team (https://github.com/pq-crystals/kyber),
- Dilithium by the CRYSTALS team (https://github.com/pq-crystals/dilithium)
- and SABER by the SABER team (https://github.com/KULeuven-COSIC/SABER)
+ Dilithium by the CRYSTALS team (https://github.com/pq-crystals/dilithium),
+ SABER by the SABER team (https://github.com/KULeuven-COSIC/SABER) and
+ FrodoKEM by the FrodoKEM team and Microsoft  (https://github.com/Microsoft/PQCrypto-LWEKE)
+
+ Original FrodoKEM license
+ ----------------------------
+ MIT License
+
+    Copyright (c) Microsoft Corporation. All rights reserved.
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE
+-----------------------------
 */
 
 #include "pch.h"
@@ -12,6 +38,7 @@
 #include "dilithium.h"
 #include "kyber.h"
 #include "saber.h"
+#include "frodo_kem.h"
 #include <iostream>
 #include <fstream>
 
@@ -59,6 +86,18 @@ void BenchmarkSaberVersions() {
   BenchmarkLightSaber();
   BenchmarkSaber();
   BenchmarkFireSaber();
+}
+
+/**
+ * Frodo benchmarks
+ * 
+ */
+void BenchmarkFrodoVersions() {
+  std::cout << "Benchmarking Frodo-KEM\n";
+  std::cout << "Results will be saved in benchmark_frodo.txt" << std::endl;
+  BenchmarkFrodo640();
+  BenchmarkFrodo976();
+  BenchmarkFrodo1344();
 }
 
 
@@ -699,6 +738,186 @@ void BenchmarkKyber1024()
   }
 }
 
+void BenchmarkFrodo640() {
+  std::ofstream frodoStream("benchmark_frodo.txt", std::ios::app);
+  if (frodoStream.is_open()) {
+    frodoStream << "Benchmarking FrodoKEM-640...\n";
+    frodoStream.close();
+  }
+  
+  unsigned int i;
+  unsigned char pk[Frodo640::PUBLICKEYBYTES];
+  unsigned char sk[Frodo640::SECRETKEYBYTES];
+  unsigned char ct[Frodo640::CIPHERTEXTBYTES];
+  unsigned char key_a[Frodo640::BYTES];
+  unsigned char key_b[Frodo640::BYTES];
+  Frodo640 frodo = Frodo640();
+
+  word64 clockKeypair, clockKemEnc, clockKemDec;
+  clockKeypair = 0;
+  clockKemEnc = 0;
+  clockKemDec = 0;
+  
+  for(i=0;i<NTESTS;i++) {
+    word64 clockBefore, clockAfter;
+    
+    clockBefore = __rdtsc();
+    frodo.KemKeypair(pk, sk);
+    clockAfter = __rdtsc();
+    clockKeypair = clockKeypair + (clockAfter - clockBefore);
+
+
+    clockBefore = __rdtsc();
+    frodo.KemEnc(ct, key_b, pk);
+    clockAfter = __rdtsc();
+    clockKemEnc = clockKemEnc + (clockAfter - clockBefore);
+
+    //Alice uses Bobs response to get her shared key
+    clockBefore = __rdtsc();
+    frodo.KemDec(key_a, ct, sk);
+    clockAfter = __rdtsc();
+    clockKemDec = clockKemDec + (clockAfter - clockBefore);
+
+    if(memcmp(key_a, key_b, Frodo640::BYTES)) {
+      std::cout << "FrodoKEM-640: Key error" << std::endl;
+    }
+      
+  }
+  frodoStream.open("benchmark_frodo.txt", std::ios::app);
+  if (frodoStream.is_open()) {
+    frodoStream << "Number of tests: ";
+    frodoStream << NTESTS << "\n";
+    frodoStream << "Average keypair time: ";
+    frodoStream << clockKeypair / NTESTS << "\n";
+    frodoStream << "Average KemEnc time: ";
+    frodoStream << clockKemEnc / NTESTS << "\n";
+    frodoStream << "Average KemDec time: ";
+    frodoStream << clockKemDec / NTESTS << "\n";
+    frodoStream << "\n";
+    frodoStream.close();
+  }
+}
+
+void BenchmarkFrodo976() {
+  std::ofstream frodoStream("benchmark_frodo.txt", std::ios::app);
+  if (frodoStream.is_open()) {
+    frodoStream << "Benchmarking FrodoKEM-976...\n";
+    frodoStream.close();
+  }
+  
+  unsigned int i;
+  unsigned char pk[Frodo976::PUBLICKEYBYTES];
+  unsigned char sk[Frodo976::SECRETKEYBYTES];
+  unsigned char ct[Frodo976::CIPHERTEXTBYTES];
+  unsigned char key_a[Frodo976::BYTES];
+  unsigned char key_b[Frodo976::BYTES];
+  Frodo976 frodo = Frodo976();
+
+  word64 clockKeypair, clockKemEnc, clockKemDec;
+  clockKeypair = 0;
+  clockKemEnc = 0;
+  clockKemDec = 0;
+  
+  for(i=0;i<NTESTS;i++) {
+    word64 clockBefore, clockAfter;
+    
+    clockBefore = __rdtsc();
+    frodo.KemKeypair(pk, sk);
+    clockAfter = __rdtsc();
+    clockKeypair = clockKeypair + (clockAfter - clockBefore);
+
+
+    clockBefore = __rdtsc();
+    frodo.KemEnc(ct, key_b, pk);
+    clockAfter = __rdtsc();
+    clockKemEnc = clockKemEnc + (clockAfter - clockBefore);
+
+    //Alice uses Bobs response to get her shared key
+    clockBefore = __rdtsc();
+    frodo.KemDec(key_a, ct, sk);
+    clockAfter = __rdtsc();
+    clockKemDec = clockKemDec + (clockAfter - clockBefore);
+
+    if(memcmp(key_a, key_b, Frodo976::BYTES)) {
+      std::cout << "FrodoKEM-976: Key error" << std::endl;
+    }
+      
+  }
+  frodoStream.open("benchmark_frodo.txt", std::ios::app);
+  if (frodoStream.is_open()) {
+    frodoStream << "Number of tests: ";
+    frodoStream << NTESTS << "\n";
+    frodoStream << "Average keypair time: ";
+    frodoStream << clockKeypair / NTESTS << "\n";
+    frodoStream << "Average KemEnc time: ";
+    frodoStream << clockKemEnc / NTESTS << "\n";
+    frodoStream << "Average KemDec time: ";
+    frodoStream << clockKemDec / NTESTS << "\n";
+    frodoStream << "\n";
+    frodoStream.close();
+  }
+}
+
+
+void BenchmarkFrodo1344() {
+  std::ofstream frodoStream("benchmark_frodo.txt", std::ios::app);
+  if (frodoStream.is_open()) {
+    frodoStream << "Benchmarking FrodoKEM-1344...\n";
+    frodoStream.close();
+  }
+  
+  unsigned int i;
+  unsigned char pk[Frodo1344::PUBLICKEYBYTES];
+  unsigned char sk[Frodo1344::SECRETKEYBYTES];
+  unsigned char ct[Frodo1344::CIPHERTEXTBYTES];
+  unsigned char key_a[Frodo1344::BYTES];
+  unsigned char key_b[Frodo1344::BYTES];
+  Frodo1344 frodo = Frodo1344();
+
+  word64 clockKeypair, clockKemEnc, clockKemDec;
+  clockKeypair = 0;
+  clockKemEnc = 0;
+  clockKemDec = 0;
+  
+  for(i=0;i<NTESTS;i++) {
+    word64 clockBefore, clockAfter;
+    
+    clockBefore = __rdtsc();
+    frodo.KemKeypair(pk, sk);
+    clockAfter = __rdtsc();
+    clockKeypair = clockKeypair + (clockAfter - clockBefore);
+
+
+    clockBefore = __rdtsc();
+    frodo.KemEnc(ct, key_b, pk);
+    clockAfter = __rdtsc();
+    clockKemEnc = clockKemEnc + (clockAfter - clockBefore);
+
+    //Alice uses Bobs response to get her shared key
+    clockBefore = __rdtsc();
+    frodo.KemDec(key_a, ct, sk);
+    clockAfter = __rdtsc();
+    clockKemDec = clockKemDec + (clockAfter - clockBefore);
+
+    if(memcmp(key_a, key_b, Frodo1344::BYTES)) {
+      std::cout << "FrodoKEM-1344: Key error" << std::endl;
+    }
+      
+  }
+  frodoStream.open("benchmark_frodo.txt", std::ios::app);
+  if (frodoStream.is_open()) {
+    frodoStream << "Number of tests: ";
+    frodoStream << NTESTS << "\n";
+    frodoStream << "Average keypair time: ";
+    frodoStream << clockKeypair / NTESTS << "\n";
+    frodoStream << "Average KemEnc time: ";
+    frodoStream << clockKemEnc / NTESTS << "\n";
+    frodoStream << "Average KemDec time: ";
+    frodoStream << clockKemDec / NTESTS << "\n";
+    frodoStream << "\n";
+    frodoStream.close();
+  }
+}
 
 
 

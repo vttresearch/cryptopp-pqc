@@ -158,6 +158,8 @@ fips140.h
 fipsalgt.cpp
 fipstest.cpp
 fltrimpl.h
+frodo_kem.cpp
+frodo_kem.h
 gcm_simd.cpp
 gcm.cpp
 gcm.h

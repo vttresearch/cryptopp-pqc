@@ -37,6 +37,8 @@
 #include "dilithium_test.h"
 //SABER tests
 #include "saber_test.h"
+//FrodoKEM tests
+#include "frodo_kem_test.h"
 
 //PQC benchmarking 
 #include "pqc_benchmark.h"
@@ -456,6 +458,10 @@ int scoped_main(int argc, char *argv[])
 		else if (command == "saber") {
 			RunSaberTests();
 		}
+		//Testing FrodoKEM
+		else if (command == "frodo") {
+			RunFrodoKemTests();
+		}
 		//PQC benchmarking
 		else if (command == "saberb") {
 			BenchmarkSaberVersions();
@@ -465,6 +471,9 @@ int scoped_main(int argc, char *argv[])
 		}
 		else if (command == "kyberb") {
 			BenchmarkKyberVersions();
+		}
+		else if (command == "frodob") {
+			BenchmarkFrodoVersions();
 		}
 		else if (command == "pqcbench") {
 			BenchmarkKyberVersions();
